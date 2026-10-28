@@ -1,0 +1,2558 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Инвертер ба батарейн ажиллах горим — интерактив лаборатори</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#CFD7DD; --panel:#EDF0F2; --panel2:#D9E0E5; --ink:#10202E; --ink2:#46586A; --line:#A9B7C2; --screw:#8997A3;
+  --pv:#C77F00; --pv-f:#F2B21F; --bat:#0A7F67; --grid:#2A5CA8; --load:#7B3F96;
+  --bad:#B3261E; --bad-bg:#F9E3E0; --warn:#8F5200; --warn-bg:#FBEFD6; --ok:#1E7B4A; --info-bg:#DDE8F5;
+  --btn:#10202E; --btn-ink:#F6F8F9;
+  --font:'IBM Plex Sans','Noto Sans',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  --fontc:'IBM Plex Sans Condensed','IBM Plex Sans','Noto Sans',system-ui,Arial,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0C1721; --panel:#13222F; --panel2:#1B2E3D; --ink:#E4EDF3; --ink2:#9FB3C2; --line:#2E4558; --screw:#4A6074;
+    --pv:#F2B21F; --pv-f:#F2B21F; --bat:#35C2A0; --grid:#6EA2EA; --load:#C58BE0;
+    --bad:#FF8A80; --bad-bg:#3A1B1B; --warn:#F0B35A; --warn-bg:#3A2D14; --ok:#5ED394; --info-bg:#172B42;
+    --btn:#E4EDF3; --btn-ink:#0C1721; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0C1721; --panel:#13222F; --panel2:#1B2E3D; --ink:#E4EDF3; --ink2:#9FB3C2; --line:#2E4558; --screw:#4A6074;
+  --pv:#F2B21F; --pv-f:#F2B21F; --bat:#35C2A0; --grid:#6EA2EA; --load:#C58BE0;
+  --bad:#FF8A80; --bad-bg:#3A1B1B; --warn:#F0B35A; --warn-bg:#3A2D14; --ok:#5ED394; --info-bg:#172B42;
+  --btn:#E4EDF3; --btn-ink:#0C1721; color-scheme:dark;
+}
+*{box-sizing:border-box}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px);height:auto}
+body{margin:0;background-color:var(--bg);background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:28px 28px;background-blend-mode:soft-light;color:var(--ink);font:15px/1.55 var(--font);-webkit-text-size-adjust:100%}
+h1,h2,h3,h4{font-family:var(--fontc);font-weight:600;line-height:1.2;margin:0}
+p{margin:0 0 .8em;max-width:72ch}
+a{color:var(--grid)}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--grid);outline-offset:2px}
+.wrap{max-width:1260px;margin:0 auto;padding:0 20px}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:20px;min-height:52px}
+.brand{font-family:var(--fontc);font-weight:600;font-size:17px;white-space:nowrap}
+.nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin-left:auto}
+.nav::-webkit-scrollbar{display:none}
+.nav a{padding:8px 12px;text-decoration:none;color:var(--ink2);white-space:nowrap;border-radius:3px;font-size:14px}
+.nav a:hover{background:var(--panel2);color:var(--ink)}
+.themebtn{background:none;border:1px solid var(--line);border-radius:3px;padding:5px 9px;cursor:pointer;color:var(--ink2)}
+
+/* sections */
+section.s{padding:44px 0 8px;border-top:1px solid var(--line)}
+section.s:first-of-type{border-top:0;padding-top:24px}
+.s h2{font-size:28px;margin-bottom:6px}
+.s .lead{color:var(--ink2);max-width:75ch;margin-bottom:22px}
+.intro h1{font-size:34px;margin:22px 0 6px}
+.intro p{color:var(--ink2)}
+
+/* panels */
+.panel{background-color:var(--panel);border:1px solid var(--ink2);border-radius:4px;box-shadow:inset 0 0 0 3px var(--panel),inset 0 0 0 4px var(--line);
+  background-image:radial-gradient(circle,var(--screw) 0 2.6px,transparent 3.2px),radial-gradient(circle,var(--screw) 0 2.6px,transparent 3.2px),radial-gradient(circle,var(--screw) 0 2.6px,transparent 3.2px),radial-gradient(circle,var(--screw) 0 2.6px,transparent 3.2px);
+  background-size:9px 9px;background-repeat:no-repeat;background-position:7px 7px,calc(100% - 7px) 7px,7px calc(100% - 7px),calc(100% - 7px) calc(100% - 7px)}
+.led{display:inline-block;width:11px;height:11px;border-radius:50%;background:#7A8791;margin-right:9px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.35)}
+.led.on{background:#3DDC84;box-shadow:0 0 9px #3DDC84}
+.btn.go{background:#1E7B4A;border-color:#1E7B4A;color:#fff}
+.btn.stop{background:#B3261E;border-color:#B3261E;color:#fff}
+.benchbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:10px}
+.benchbar select{padding:5px 8px;background:var(--panel);border:1px solid var(--ink2);border-radius:3px;max-width:230px}
+.benchgrid{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-items:start}
+.benchside{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+.pal{display:flex;flex-direction:row;flex-wrap:wrap;gap:6px 8px;padding:18px 16px}
+.pal .pg{width:100%;font:600 14px var(--fontc);margin-top:6px;border-top:1px solid var(--line);padding-top:8px}
+.pal .pg:first-child{border-top:0;margin-top:0;padding-top:0}
+.pb{width:196px;display:flex;flex-direction:column;text-align:left;background:var(--panel2);border:1px solid var(--ink2);border-radius:3px;padding:6px 8px;cursor:pointer}
+.pb:hover{border-color:var(--grid)}
+.pb b{font-weight:600;font-size:13.5px}
+.pb span{font-size:11.5px;color:var(--ink2);line-height:1.3}
+.bwrap{overflow-x:auto;padding:8px}
+.bwrap svg{display:block;width:100%;min-width:1000px;height:auto;user-select:none}
+.bom td:last-child,.bom th:last-child{text-align:left;font-size:12px;color:var(--ink2)}
+.bom td:nth-child(2),.bom th:nth-child(2){text-align:center}
+@media (max-width:900px){.benchside{grid-template-columns:1fr}.pb{width:calc(50% - 4px)}}
+.pad{padding:16px}
+
+/* simulator layout */
+.simgrid{display:grid;grid-template-columns:minmax(0,1.85fr) minmax(300px,1fr);gap:16px;align-items:start}
+.diagram{padding:10px 10px 6px}
+.diagram{overflow-x:auto}
+.diagram svg{display:block;width:100%;height:auto}
+@media (max-width:700px){.diagram svg{min-width:600px}}
+.clockbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 12px;border-top:1px solid var(--line)}
+.clockbar .time{font:600 26px/1 var(--fontc);font-variant-numeric:tabular-nums;min-width:74px}
+.clockbar input[type=range]{flex:1;min-width:140px}
+.btn{background:var(--btn);color:var(--btn-ink);border:1px solid var(--btn);border-radius:3px;padding:7px 14px;cursor:pointer;font-weight:500}
+.btn:hover{opacity:.88}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--ink2)}
+.btn.small{padding:4px 10px;font-size:13px}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.seg{display:inline-flex;border:1px solid var(--ink2);border-radius:3px;overflow:hidden}
+.seg button{background:transparent;border:0;border-right:1px solid var(--line);padding:6px 10px;cursor:pointer;font-size:13px;color:var(--ink)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed=true]{background:var(--btn);color:var(--btn-ink)}
+
+.reads{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.read{background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--ink2);border-radius:3px;padding:8px 10px}
+.read.pv{border-top-color:var(--pv)} .read.bat{border-top-color:var(--bat)} .read.grid{border-top-color:var(--grid)} .read.load{border-top-color:var(--load)}
+.read .k{font-size:12.5px;color:var(--ink2)}
+.read .v{font:600 24px/1.15 var(--fontc);font-variant-numeric:tabular-nums}
+.read .v small{font:400 13px var(--font);color:var(--ink2);margin-left:3px}
+.read .sub{font-size:12px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.read.wide{grid-column:1/-1}
+.vbar{height:8px;background:var(--panel2);border-radius:2px;position:relative;margin-top:6px}
+.vbar i{position:absolute;top:0;bottom:0;left:0;background:var(--pv);border-radius:2px}
+.vbar b{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--bad)}
+
+.alerts{margin-top:10px;display:flex;flex-direction:column;gap:6px;min-height:20px}
+.al{border-left:4px solid var(--ink2);background:var(--panel);padding:8px 10px;border-radius:2px;font-size:13.5px}
+.al b{display:block;margin-bottom:2px}
+.al.fault{border-color:var(--bad);background:var(--bad-bg)}
+.al.warn{border-color:var(--warn);background:var(--warn-bg)}
+.al.info{border-color:var(--grid);background:var(--info-bg)}
+.al.ok{border-color:var(--ok)}
+.al .row{display:flex;justify-content:flex-end;margin-top:6px}
+
+/* diagram svg */
+.d-line{fill:none;stroke:var(--line);stroke-width:3;stroke-linecap:round}
+.d-flow{fill:none;stroke-linecap:round;stroke-dasharray:9 9;opacity:0;animation:dash 0.9s linear infinite}
+.d-flow.on{opacity:1}
+.d-flow.rev{animation-direction:reverse}
+@keyframes dash{to{stroke-dashoffset:-18}}
+@media (prefers-reduced-motion: reduce){.d-flow{animation:none}}
+.d-node{fill:var(--panel);stroke:var(--ink);stroke-width:1.5}
+.d-txt{fill:var(--ink);font-family:var(--fontc);font-size:15px}
+.d-sub{fill:var(--ink2);font-family:var(--font);font-size:12px}
+.d-big{fill:var(--ink);font-family:var(--fontc);font-weight:600;font-size:19px;font-variant-numeric:tabular-nums}
+.d-inv.fault{stroke:var(--bad);stroke-width:3}
+
+/* controls */
+.ctl{margin-top:16px}
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:10px 16px;cursor:pointer;color:var(--ink2);white-space:nowrap;font-weight:500}
+.tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--ink)}
+.tabpane{padding:16px}
+.tabpane:not(.on){display:none}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px 22px}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.f label{font-size:13.5px;color:var(--ink2);display:flex;justify-content:space-between;gap:8px}
+.f label output{color:var(--ink);font-variant-numeric:tabular-nums;font-weight:600}
+.f select,.f input[type=number]{padding:6px 8px;background:var(--panel);border:1px solid var(--ink2);border-radius:3px;width:100%}
+.f input[type=range]{width:100%;accent-color:var(--grid)}
+.f.chk{flex-direction:row;align-items:center;gap:8px}
+.f.chk label{color:var(--ink)}
+.hint{font-size:13px;color:var(--ink2);margin-top:2px}
+.fs-title{grid-column:1/-1;font:600 16px var(--fontc);border-top:1px solid var(--line);padding-top:12px;margin-top:4px}
+.fs-title:first-child{border-top:0;padding-top:0;margin-top:0}
+.apps{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px 22px}
+.app{display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--line);border-radius:3px;background:var(--panel)}
+.app span{flex:1;min-width:0}
+.app input[type=number]{width:74px}
+.modeinfo{grid-column:1/-1;background:var(--info-bg);border-left:4px solid var(--grid);padding:8px 12px;border-radius:2px;font-size:14px}
+
+/* charts */
+.charts{display:grid;grid-template-columns:1fr;gap:10px;margin-top:16px}
+.chart{padding:10px 12px}
+.chart h3{font-size:15px;margin-bottom:2px}
+.chart .cap{font-size:12.5px;color:var(--ink2);margin-bottom:4px}
+.chart svg{width:100%;height:auto;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--ink2);margin-bottom:4px}
+.legend i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:5px;border-radius:2px}
+.ax{stroke:var(--line);stroke-width:1}
+.axt{fill:var(--ink2);font:11px var(--font)}
+
+/* energy table */
+.etable{width:100%;border-collapse:collapse;font-size:14px}
+.etable td,.etable th{padding:5px 8px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+.etable td:first-child,.etable th:first-child{text-align:left}
+.etable th{font-weight:600;color:var(--ink2);font-size:13px}
+
+/* lab cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.card{padding:16px;display:flex;flex-direction:column;gap:8px}
+.card h3{font-size:18px}
+.card .tag{font-size:12.5px;color:var(--ink2)}
+.card ul{margin:0;padding-left:18px;font-size:14px}
+.card li{margin-bottom:3px}
+.card .q{font-size:14px;border-top:1px dashed var(--line);padding-top:8px;color:var(--ink2)}
+.card .actions{margin-top:auto;display:flex;gap:8px;flex-wrap:wrap;padding-top:6px}
+.card.fault{border-left:4px solid var(--bad)}
+.card dl{margin:0;font-size:13.5px;display:grid;grid-template-columns:auto 1fr;gap:2px 10px}
+.card dt{color:var(--ink2)} .card dd{margin:0}
+
+/* compare */
+.cmp{overflow-x:auto}
+.cmp table{width:100%;min-width:720px;border-collapse:collapse;font-size:14px}
+.cmp th,.cmp td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+.cmp th:first-child,.cmp td:first-child{text-align:left;font-weight:600}
+.cmp th{font-size:13px;color:var(--ink2);font-weight:600}
+.cmp tr.best td{background:var(--info-bg)}
+.bars{display:flex;flex-direction:column;gap:6px;margin-top:14px}
+.bar{display:grid;grid-template-columns:70px 1fr 70px;gap:8px;align-items:center;font-size:13.5px}
+.bar .tr{height:14px;background:var(--panel2);border-radius:2px;position:relative;overflow:hidden}
+.bar .tr i{position:absolute;inset:0 auto 0 0;background:var(--grid)}
+.bar .num{text-align:right;font-variant-numeric:tabular-nums}
+
+/* select table */
+.sel{overflow-x:auto}
+.sel table{width:100%;min-width:900px;border-collapse:collapse;font-size:13.5px}
+.sel th,.sel td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums;vertical-align:middle}
+.sel th:first-child,.sel td:first-child{text-align:left}
+.sel th{font-size:12.5px;color:var(--ink2);font-weight:600}
+.sel tr.top td{background:var(--info-bg)}
+.sel .yes{color:var(--ok);font-weight:600} .sel .no{color:var(--bad);font-weight:600}
+.score{display:inline-block;min-width:34px;padding:1px 6px;border-radius:2px;background:var(--btn);color:var(--btn-ink);font-weight:600}
+
+/* theory */
+details.th{border:1px solid var(--line);background:var(--panel);border-radius:3px;margin-bottom:8px}
+details.th summary{cursor:pointer;padding:12px 14px;font:600 17px var(--fontc);list-style:none;display:flex;justify-content:space-between;gap:10px}
+details.th summary::-webkit-details-marker{display:none}
+details.th summary::after{content:'+';color:var(--ink2);font-size:20px;line-height:1}
+details.th[open] summary::after{content:'–'}
+details.th .body{padding:2px 16px 14px}
+details.th table{border-collapse:collapse;font-size:14px;margin:6px 0 10px;width:100%}
+details.th td,details.th th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+details.th ul{margin:0 0 .8em;padding-left:20px}
+
+/* quiz */
+.quiz{display:flex;flex-direction:column;gap:14px}
+.qq{padding:14px 16px}
+.qq h4{font-size:17px;margin-bottom:8px}
+.qo{display:block;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);padding:8px 12px;border-radius:3px;cursor:pointer;margin-bottom:6px}
+.qo:hover{border-color:var(--ink2)}
+.qo.right{border-color:var(--ok);background:var(--info-bg)}
+.qo.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.qe{font-size:14px;color:var(--ink2);margin-top:6px}
+.score-line{font:600 20px var(--fontc)}
+
+footer{padding:36px 0 48px;color:var(--ink2);font-size:13.5px;border-top:1px solid var(--line);margin-top:48px}
+
+@media (max-width:980px){
+  .simgrid{grid-template-columns:1fr}
+  .reads{grid-template-columns:repeat(4,1fr)}
+}
+@media (max-width:640px){
+  .wrap{padding:0 12px}
+  .reads{grid-template-columns:1fr 1fr}
+  .intro h1{font-size:26px}
+  .s h2{font-size:23px}
+  .brand{font-size:15px}
+  .top .wrap{gap:8px}
+}
+
+/* ---- views, lab flow ---- */
+.view{display:none}
+.view.on{display:block}
+.view.s{border-top:0;padding-top:26px}
+.h1{font-size:34px;margin:6px 0 8px}
+.back{font-size:14px;color:var(--ink2)}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--btn);color:var(--btn-ink);padding:10px 16px;border-radius:3px;font-size:14px;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw}
+#toast.on{opacity:1}
+.nav a.locked{opacity:.5}
+.nav a[aria-current=page]{background:var(--btn);color:var(--btn-ink)}
+.gate{background:var(--warn-bg);border-left:4px solid var(--warn);padding:10px 14px;border-radius:2px;margin-bottom:14px}
+.wiredone{display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap}
+.path{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:10px}
+.pstep{padding:18px 18px 16px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:inherit}
+.pstep h3{font-size:19px}
+.pstep p{font-size:14px;color:var(--ink2);margin:0}
+.chip{display:inline-block;font-size:12px;padding:1px 8px;border-radius:10px;border:1px solid var(--ink2);color:var(--ink2);white-space:nowrap}
+.chip.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.chip.lock{border-style:dashed}
+.chip.open{border-color:var(--grid);color:var(--grid)}
+.stepper{display:flex;gap:0;margin:8px 0 14px;overflow-x:auto}
+.stepper button{background:var(--panel2);border:1px solid var(--ink2);border-right:0;padding:8px 14px;cursor:pointer;white-space:nowrap;font-size:14px;color:var(--ink2)}
+.stepper button:last-child{border-right:1px solid var(--ink2)}
+.stepper button[aria-current=step]{background:var(--btn);color:var(--btn-ink)}
+.stepper button.done::before{content:'✓ ';color:var(--ok);font-weight:700}
+.stepper button[aria-current=step].done::before{color:#7be3a8}
+.stepper button:disabled{opacity:.5;cursor:not-allowed}
+.steprow{display:flex;gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap}
+.chk-list{list-style:none;margin:0;padding:0;font-size:14px}
+.chk-list li{padding:3px 0 3px 26px;position:relative;color:var(--ink2)}
+.chk-list li::before{content:'';position:absolute;left:2px;top:6px;width:14px;height:14px;border:2px solid var(--ink2);border-radius:50%}
+.chk-list li.ok{color:var(--ink)}
+.chk-list li.ok::before{background:var(--ok);border-color:var(--ok)}
+.chk-list li.ok::after{content:'';position:absolute;left:7px;top:8px;width:3px;height:7px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.lab-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.ph h3{font-size:18px;margin-bottom:6px}
+.ph h4{font:600 15px var(--fontc);margin:10px 0 4px}
+.ph .tab{font-size:12px;color:var(--ink2)}
+.f.target{outline:2px solid var(--pv-f);outline-offset:4px;border-radius:3px;background:rgba(242,178,31,.14)}
+.wlive{fill:none;stroke:#fff;stroke-width:2;stroke-dasharray:3 13;opacity:.75;animation:wdash 1s linear infinite;pointer-events:none}
+@keyframes wdash{to{stroke-dashoffset:-32}}
+@media (prefers-reduced-motion: reduce){.wlive{animation:none}.hlring{animation:none}}
+.hlring{fill:none;stroke:#F2B21F;stroke-width:3;animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{stroke-width:6;opacity:.5}}
+.benchbar .free{}
+#benchBlock.lab .free{display:none}
+.bench-note{font-size:13px;color:var(--ink2)}
+@media (max-width:640px){.h1{font-size:25px}.lab-grid{grid-template-columns:1fr}}
+
+.app{flex-direction:column;align-items:stretch;gap:6px}
+.app .aname{display:flex;align-items:center;gap:8px;font-weight:500}
+.app .ain{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.app .ain label{font-size:11.5px;color:var(--ink2);display:flex;flex-direction:column;gap:2px}
+.app .ain input{width:100%;padding:4px 6px;background:var(--panel);border:1px solid var(--ink2);border-radius:3px}
+.apps{grid-template-columns:repeat(auto-fill,minmax(270px,1fr))}
+#quizProg{font-weight:600;color:var(--ink)}
+.pal{gap:6px;align-items:center}
+.pal .pg{width:auto;border:0;margin:0 2px 0 12px;padding:0;font-size:13.5px;color:var(--ink2)}
+.pal .pg:first-child{margin-left:0}
+.pb{width:auto;padding:5px 10px;flex-direction:row}
+.pb span{display:none}
+.pb b{font-size:13px;white-space:nowrap}
+
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <span class="brand"><span class="led" id="led"></span>Инвертер лаборатори</span>
+    <nav class="nav" id="nav" aria-label="Хэсгүүд"></nav>
+    <button class="themebtn" id="themeBtn" aria-label="Харанхуй/гэрэлтэй горим солих" title="Харанхуй / гэрэлтэй">◐</button>
+  </div>
+</header>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<main class="wrap">
+
+<section class="view s" id="v-home">
+  <h1 class="h1">Нарны систем, инвертер, батарейн ажиллах горим</h1>
+  <p class="lead">«Инвертерийн ажиллах горимыг тохируулж, удирдах, инвертер, батарейн параметрийн өөрчлөлт системийн ажиллагаанд хэрхэн нөлөөлөх» хичээлийн практик лаборатори. Эхлээд өөрөө схемээ угсарч, дараа нь тэр системээр симуляци хийж, лаборатори бүрд алдааг өөрөө гаргаж, засна.</p>
+  <div id="homePath" class="path"></div>
+</section>
+
+<section class="view s" id="v-wiring">
+  <h2>1. Холболт: самбар дээр систем угсрах</h2>
+  <p class="lead">Нарны хавтан, батарей, сүлжээ, автомат, инвертер, ачааллыг утсаар холбоно. Схем зөв, хамгаалалттай болсон үед симулятор, лабораторууд нээгдэнэ. Эд ангийг дарж нэмнэ, чирж зөөнө, терминал дээр дараад дараагийн терминал дээр дарж утас татна. Гацвал «Зөвлөмж» товчийг дарна.</p>
+  <div id="wireGate" class="gate" hidden></div>
+  <div id="slotWiring"></div>
+  <div class="wiredone panel pad" id="wireDone" hidden>
+    <b>Холболт зөв, бүрэн боллоо.</b> Одоо яг энэ системээр симуляци хийнэ.
+    <span style="flex:1"></span>
+    <button class="btn go" id="btnWireNext">2. Симулятор руу шилжих</button>
+  </div>
+</section>
+
+<section class="view s" id="v-sim">
+  <h2>2. Симулятор: өөрийн схемээр ажиллуулах</h2>
+  <p class="lead" id="simLead">Параметрээ өөрчилж, эрчим хүчний урсгал, батарейн хүчдэл, алдааны хамгаалалт хэрхэн хариу өгөхийг ажигла.</p>
+  <div id="slotSim"></div>
+</section>
+
+<section class="view s" id="v-labs">
+  <h2>3. Лабораториуд</h2>
+  <p class="lead">Лаборатори бүр тусдаа хуудастай: өөрийн схемээ угсарна, инвертерийн горим, тохиргоогоо хийнэ, алдааг ажиглаж засна, асуултад хариулна. Хялбараас хүнд рүү дарааллаар нь хий. Өмнөх нь дууссанаар дараагийнх нээгдэнэ.</p>
+  <label class="hint" style="display:inline-flex;gap:6px;align-items:center;margin-bottom:12px"><input type="checkbox" id="openAll"> Бүх лабораторийг нээх (багшийн горим)</label>
+  <div class="cards" id="labList"></div>
+</section>
+
+<section class="view s" id="v-lab">
+  <p><a href="#/labs" class="back">← Лабораториуд</a></p>
+  <h2 id="labTitle"></h2>
+  <div class="stepper" id="labStepper"></div>
+  <div id="labIntro"></div>
+
+  <div id="stWire">
+    <div class="panel pad" id="labWireTask" style="margin-bottom:12px"></div>
+    <div id="slotLabBench"></div>
+    <div class="steprow"><span style="flex:1"></span><button class="btn go" id="btnLabToRun" disabled>Холболт зөв. Тохиргоо руу →</button></div>
+  </div>
+
+  <div id="stRun" hidden>
+    <div class="panel pad" id="labPhaseCard" style="margin-bottom:14px"></div>
+    <div id="slotLabSim"></div>
+    <details class="th" id="labCtlBox" style="margin-top:14px" open><summary>Инвертер, батарей, орчны тохиргоо</summary><div class="body" id="slotLabCtl" style="padding:0"></div></details>
+    <div id="slotLabCharts"></div>
+  </div>
+
+  <div id="stQ" hidden>
+    <h3 style="margin-bottom:10px">Дүгнэлтийн асуулт</h3>
+    <div class="quiz" id="labQuiz"></div>
+    <p class="score-line" id="labQScore" style="margin-top:12px"></p>
+    <div class="steprow" id="labDoneRow" hidden><span style="flex:1"></span><button class="btn go" id="btnLabNext">Дараагийн лаборатори →</button></div>
+  </div>
+</section>
+
+<section class="view s" id="v-compare">
+  <h2>Гаралтын тэжээлийн дарааллын харьцуулалт</h2>
+  <p class="lead">Симуляторын одоогийн тохиргоог (нар, ачаалал, батарей, сүлжээ) ашиглан хосолмол системийг 00:00-ээс 24 цаг тус бүр горимоор ажиллуулж үр дүнг харьцуулна. Нарны хавтан, батарейн хэмжээ, сүлжээний тасралтыг өөрчлөөд дахин ажиллуулаарай.</p>
+  <p><button class="btn" id="btnCmp">Горимуудыг харьцуулах</button></p>
+  <div class="panel pad cmp" id="cmpOut"></div>
+  <p class="hint" id="cmpNote" style="margin-top:8px"></p>
+</section>
+<section class="view s" id="v-dcac">
+  <h2>DC/AC чадлын харьцаа</h2>
+  <p class="lead">Нарны хавтан бүтэн чадлаараа ховор ажилладаг (өнцөг, температур, тоос, үүл). Иймээс DC чадлыг инвертерийн AC чадлаас арай их, ойролцоогоор 1.2 орчим сонгодог. Хэт их болговол оргил цагт чадал хайчлагдана (clipping).</p>
+  <div class="panel pad">
+    <div class="fgrid" id="dcacCtl"></div>
+    <div class="reads" id="dcacReads" style="margin:14px 0;grid-template-columns:repeat(auto-fill,minmax(160px,1fr))"></div>
+    <div class="charts" style="margin-top:0">
+      <div class="chart"><h3>Өдрийн DC ба AC чадал</h3><div class="legend"><span><i style="background:var(--bad)"></i>Хайчлагдсан хэсэг</span><span><i style="background:var(--pv-f)"></i>Инвертерээс гарах чадал</span></div><svg id="dcacCh1" viewBox="0 0 760 200"></svg></div>
+      <div class="chart"><h3>DC/AC харьцаанаас хамаарах хайчлалтын алдагдал</h3><div class="legend"><span><i style="background:var(--pv-f)"></i>Зун</span><span><i style="background:var(--grid)"></i>Хавар, намар</span><span><i style="background:var(--bat)"></i>Өвөл</span></div><p class="cap">Өвөл нар сул тул өндөр харьцаа ч бараг алдагдалгүй. Зуны оргил цаг хайчлалтыг тодорхойлно.</p><svg id="dcacCh2" viewBox="0 0 760 200"></svg></div>
+    </div>
+  </div>
+</section>
+<section class="view s" id="v-select">
+  <h2>Инвертер сонгох</h2>
+  <p class="lead">Хичээлд харьцуулсан 8 инвертерийн үзүүлэлтээр өөрийн системд тохирохыг шүүнэ. Шаардлага хангаагүй загварт шалтгааныг нь харуулна.</p>
+  <div class="panel pad">
+    <div class="fgrid" id="selCtl"></div>
+    <div class="sel" style="margin-top:14px"><table id="selTable"></table></div>
+    <p class="hint" id="selNote"></p>
+  </div>
+</section>
+<section class="view s" id="v-theory">
+  <h2>Онолын товч</h2>
+  <p class="lead">Хичээлийн слайдуудын гол агуулга.</p>
+  <div id="theoryBox"></div>
+</section>
+<section class="view s" id="v-quiz">
+  <h2>Мэдлэгээ шалгах</h2>
+  <div class="steprow" style="margin-bottom:12px"><span class="hint" id="quizProg"></span><span style="flex:1"></span><button class="btn ghost small" id="btnQuizRestart">Дахин эхлэх</button></div>
+  <div class="quiz" id="quizBox"></div>
+  <p class="score-line" id="quizScore" style="margin-top:14px"></p>
+  <div class="steprow" id="quizEnd" hidden><button class="btn go" id="btnQuizRestart2">Тестийг дахин эхлэх</button></div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Хичээлийн материал: Э.Жавхлантөгс (магистр), ШУТИС Эрчим хүчний инженерчлэлийн сургууль. Инвертерийн үзүүлэлт, стандартын утгууд хичээлийн слайдаас авсан.</p>
+    <p>Симуляторын загвар хялбаршуулсан тул тоон үр дүн зөвхөн сургалтад зориулагдсан. Бодит төсөлд үйлдвэрлэгчийн datasheet болон батарейн BMS-ийн заавар баримтална.</p>
+  </div>
+</footer>
+
+<div id="pool" hidden>
+  <div id="benchBlock"><div class="benchbar">
+    <span class="hint free">Жишээ схем:</span>
+    <button class="btn ghost small free" data-preset="hybrid">Хосолмол</button>
+    <button class="btn ghost small free" data-preset="ongrid">Сүлжээтэй зэрэгцээ</button>
+    <select id="faultSel" class="free" aria-label="Алдаатай схем"></select> <button class="btn ghost small free" data-preset="faulty">Алдаатай схем ачаалах</button>
+    <span style="flex:1"></span>
+    <label class="hint" for="benchInv">Инвертер:</label><select id="benchInv"></select>
+    <button class="btn ghost small" id="btnBenchUndo">Буцаах</button>
+    <button class="btn ghost small" id="btnBenchHint">Зөвлөмж</button>
+    <button class="btn ghost small" id="btnBenchDel">Сонгосныг устгах</button>
+    <button class="btn ghost small" id="btnBenchClear">Цэвэрлэх</button>
+    <button class="btn go free" id="btnBenchApply" disabled>Симуляторт ачаалах</button>
+  </div>
+  <p class="hint" id="benchHint" aria-live="polite">Эд ангийг дарж нэмнэ, чирж зөөнө. Терминал дээр дараад дараагийн терминал дээр дарж утас татна. Утас дээр дарвал устна, автоматын хөшүүргийг дарвал асна/унтарна.</p>
+  <div class="benchgrid">
+    <div class="panel pad pal" id="benchPal"></div>
+    <div class="panel bwrap"><svg id="bench" viewBox="0 0 1360 900" role="img" aria-label="Холболтын самбар"></svg></div>
+    <div class="benchside">
+      <div>
+      <div class="panel pad" id="benchReqBox" hidden style="margin-bottom:12px"><h3 style="font-size:16px;margin-bottom:6px">Шаардлага</h3><ul class="chk-list" id="benchReq"></ul></div>
+      <div class="alerts" id="benchMsgs" aria-live="polite"></div>
+      </div>
+      <div class="panel pad"><h3 style="font-size:16px;margin-bottom:6px">Хэрэглэгдсэн тоног төхөөрөмж</h3><table class="etable bom" id="benchBom"></table></div>
+    </div>
+  </div>
+</div>
+  <div id="simBlock"><div class="simgrid">
+    <div>
+      <div class="panel">
+        <div class="diagram">
+          <svg id="wd" viewBox="0 0 800 520" role="img" aria-label="Угсарсан схемийн холболт ба эрчим хүчний урсгал"></svg>
+        </div>
+        <div class="clockbar">
+          <button class="btn" id="btnPlay" aria-label="Эхлүүлэх эсвэл түр зогсоох">▶ Эхлүүлэх</button>
+          <span class="time" id="clock" aria-live="off">06:00</span>
+          <input type="range" id="tSlider" min="0" max="23.99" step="0.05" value="6" aria-label="Өдрийн цаг">
+          <div class="seg" id="speedSeg" role="group" aria-label="Симуляцийн хурд">
+            <button data-v="10">10 мин/с</button><button data-v="30" aria-pressed="true">30 мин/с</button><button data-v="60">1 цаг/с</button><button data-v="120">2 цаг/с</button>
+          </div>
+          <button class="btn ghost small" id="btnClear" disabled>Алдаа арилгах</button>
+          <button class="btn ghost small" id="btnReset">Шинээр эхлүүлэх</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="reads" id="reads"></div>
+      <div class="alerts" id="alerts" aria-live="polite"></div>
+    </div>
+  </div>
+
+  </div>
+  <div id="ctlBlock"><div class="panel ctl">
+    <div class="tabs" role="tablist" id="ctlTabs"></div>
+    <div id="ctlPanes"></div>
+  </div>
+
+  </div>
+  <div id="chartsBlock"><div class="charts">
+    <div class="panel chart">
+      <h3>Өдрийн чадлын график</h3>
+      <div class="legend"><span><i style="background:var(--pv-f)"></i>Нар (ашигласан)</span><span><i style="background:var(--load)"></i>Ачаалал</span><span><i style="background:var(--grid)"></i>Сүлжээ (+ авч, − өгч)</span><span><i style="background:var(--bat)"></i>Батарей (+ өгч, − авч)</span></div>
+      <svg id="ch1" viewBox="0 0 760 190" role="img" aria-label="Өдрийн чадлын график"></svg>
+    </div>
+    <div class="panel chart">
+      <h3>Батарейн цэнэг ба хүчдэл</h3>
+      <p class="cap">Тасархай шугам нь cut-off хүчдэл. Цэнэглэх үед хүчдэл өсөж, гүйдэл тогтмол (CC) байснаа тогтмол хүчдэлийн (CV) шатанд буурна.</p>
+      <div class="legend"><span><i style="background:var(--bat)"></i>SOC, % (зүүн)</span><span><i style="background:var(--ink)"></i>Хүчдэл, V (баруун)</span><span><i style="background:var(--load)"></i>Гүйдэл, A (доор)</span></div>
+      <svg id="ch2" viewBox="0 0 760 170" role="img" aria-label="Батарейн SOC ба хүчдэлийн график"></svg>
+      <svg id="ch3" viewBox="0 0 760 120" role="img" aria-label="Батарейн гүйдлийн график"></svg>
+    </div>
+    <div class="panel chart">
+      <h3>Өнөөдрийн энергийн тооцоо</h3>
+      <p class="cap" id="dayCap"></p>
+      <table class="etable" id="etable"></table>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+/* ===================== MODEL (DOM-гүй, цэвэр тооцоолол) ===================== */
+const INVERTERS = [
+  { brand:'Bluesun',  name:'BSM-5500BLV-48DA',    pn:5500, pvmax:6000, mppt:1, eff:92,   tmin:-10, tmax:55, cost:414 },
+  { brand:'MUST',     name:'PV19-4024 EXP',       pn:4000, pvmax:5000, mppt:1, eff:92,   tmin:0,   tmax:50, cost:680 },
+  { brand:'Growatt',  name:'SPF 3500 ES',         pn:3500, pvmax:4500, mppt:1, eff:93,   tmin:0,   tmax:55, cost:720 },
+  { brand:'Huawei',   name:'SUN2000-3KTL-L1',     pn:3000, pvmax:4500, mppt:2, eff:98.3, tmin:-25, tmax:60, cost:694.29 },
+  { brand:'GWD',      name:'4KL1-G2',             pn:4000, pvmax:6000, mppt:2, eff:97,   tmin:-25, tmax:60, cost:647 },
+  { brand:'Deye',     name:'SUN-3.6K-SG03LP1-EU', pn:3000, pvmax:3900, mppt:1, eff:96.5, tmin:-45, tmax:60, cost:687 },
+  { brand:'iParwa',   name:'HF2430S60-100',       pn:3000, pvmax:6000, mppt:1, eff:95,   tmin:-15, tmax:55, cost:303 },
+  { brand:'Consnant', name:'CNS110 Off-Grid',     pn:3000, pvmax:5500, mppt:1, eff:93,   tmin:-10, tmax:50, cost:236.5 }
+];
+INVERTERS.forEach(i => { i.ratio = +(i.pvmax / i.pn).toFixed(2); });
+
+const PANEL = { name:'Jinko Solar JKM605N-78HL4-BDV', pmax:605, vmp:45.42, imp:13.32, voc:54.5, eff:21.64, dim:'2465 × 1134 × 35 мм' };
+const SEASONS = {
+  summer:  { label:'Зун',           sr:5.5, ss:21,  pk:1.00 },
+  equinox: { label:'Хавар, намар',  sr:7,   ss:18,  pk:0.82 },
+  winter:  { label:'Өвөл',          sr:8.7, ss:17,  pk:0.55 }
+};
+
+const APPLIANCES = [
+  { id:'fridge',  name:'Хөргөгч',               w:120,  surge:4, sched:[[0,24]] },
+  { id:'lights',  name:'Гэрэлтүүлэг',           w:150,  surge:1, sched:[[6,8],[17,24]] },
+  { id:'tv',      name:'Телевиз, Wi-Fi',        w:150,  surge:1, sched:[[18,23]] },
+  { id:'kettle',  name:'Цахилгаан данх',        w:1800, surge:1, sched:[[7,7.5],[12,12.5],[19,19.5]] },
+  { id:'washer',  name:'Угаалгын машин',        w:600,  surge:2, sched:[[13,15]] },
+  { id:'micro',   name:'Богино долгионы зуух',  w:1000, surge:1, sched:[[12,12.5],[18.5,19]] },
+  { id:'heater',  name:'Цахилгаан халаагуур',   w:1500, surge:1, sched:[[19,24],[0,6]] },
+  { id:'pump',    name:'Усны шахуурга',         w:750,  surge:3, sched:[[8,9],[17,18]] },
+  { id:'laptop',  name:'Компьютер, зөөврийн',   w:80,   surge:1, sched:[[9,18]] },
+  { id:'fan',     name:'Сэнс',                  w:60,   surge:1, sched:[[12,18]] },
+  { id:'ac',      name:'Агааржуулагч (кондиционер)', w:1200, surge:3, sched:[[13,17]] },
+  { id:'induct',  name:'Индукцийн плита',       w:2000, surge:1, sched:[[7,7.5],[18,19]] },
+  { id:'boiler',  name:'Усны халаагуур (бойлер)', w:1500, surge:1, sched:[[5,7]] },
+  { id:'vacuum',  name:'Тоос сорогч',           w:1000, surge:2, sched:[[10,10.5]] },
+  { id:'oil',     name:'Тосон халаагуур',       w:800,  surge:1, sched:[[20,24],[0,6]] }
+];
+const APP_DEFAULT_ON = { fridge:true, lights:true, tv:true, kettle:true, washer:true, micro:false, heater:false, pump:false, laptop:false, fan:false, ac:false, induct:false, boiler:false, vacuum:false, oil:false };
+
+const OCV = {
+  lfp: [[0,44.0],[5,47.5],[10,49.6],[20,51.2],[30,51.9],[50,52.6],[70,53.0],[80,53.3],[90,53.9],[95,54.8],[100,56.0]],
+  la:  [[0,44.6],[10,46.2],[20,47.2],[40,48.6],[60,49.9],[80,51.1],[100,52.4]]
+};
+
+function interp(tbl, x) {
+  if (x <= tbl[0][0]) return tbl[0][1];
+  for (let i = 1; i < tbl.length; i++) {
+    if (x <= tbl[i][0]) {
+      const [x0, y0] = tbl[i-1], [x1, y1] = tbl[i];
+      return y0 + (y1 - y0) * (x - x0) / (x1 - x0);
+    }
+  }
+  return tbl[tbl.length-1][1];
+}
+const ocvAt = (soc, chem, vn) => interp(OCV[chem], soc * 100) * vn / 48;
+const battR = (C) => (C.chem === 'lfp' ? 2.5 : 5) / C.ah * Math.pow(C.vn / 48, 2);
+const battVmax = (C) => (C.chem === 'lfp' ? 58.4 : 58.8) * C.vn / 48;
+
+function defaultCfg() {
+  const apps = {};
+  APPLIANCES.forEach(a => apps[a.id] = { on: !!APP_DEFAULT_ON[a.id], w: a.w, win: a.sched.map(x => x.slice()) });
+  return {
+    sysType:'hybrid', mode:'SBU', inv:2, fanOK:true, indoor:true, autoReset:false,
+    season:'equinox', tamb:8, cloud:15, shading:0, series:3, strings:2, vpvmax:450, vpvmin:80,
+    vn:48, chem:'lfp', ah:200, soc0:60,
+    vabs:56.4, maxChgA:60, vcut:45.0, vswitch:48.0, vreturn:52.0, vrestart:50.0,
+    reserve:15, gridCharge:false, export:false, maxGridChgA:30,
+    sched:true, extra:0, apps,
+    gridMode:'ok', outFrom:19, outTo:23, gridV:230, gridF:50.0,
+    peakThr:1500, peakFrom:17, peakTo:22, preFrom:23, preTo:6, preSoc:90,
+    startH:6
+  };
+}
+
+function sunFactor(h, season, cloud, tAbs) {
+  const s = SEASONS[season];
+  const x = (h - s.sr) / (s.ss - s.sr);
+  if (x <= 0 || x >= 1) return 0;
+  let g = s.pk * Math.pow(Math.sin(Math.PI * x), 1.15);
+  const c = cloud / 100;
+  if (c > 0) {
+    const n = 0.5 + 0.5 * Math.sin(tAbs * 5.3 + Math.sin(tAbs * 1.7) * 2.1);
+    g *= 1 - c * (0.45 + 0.45 * n);
+  }
+  return Math.max(0, g);
+}
+
+function loadAt(C, h) {
+  let L = C.extra || 0; const act = {};
+  for (const a of APPLIANCES) {
+    const st = C.apps[a.id];
+    if (!st || !st.on) continue;
+    let run = true;
+    if (C.sched) run = (st.win || a.sched).some(([s, e]) => h >= s && h < e);
+    if (run) { L += st.w; act[a.id] = true; }
+  }
+  return { L, act };
+}
+
+function newState(C) {
+  const S = {
+    t: C.startH || 0, soc: C.soc0 / 100, tinv: C.tamb, xfer: false,
+    latch: null, latchT: 0, prevOn: {}, surgeUntil: {},
+    vt: 0, E: newEnergy(), flow: {}, alerts: []
+  };
+  S.vt = ocvAt(S.soc, C.chem, C.vn);
+  S.tinv = C.indoor ? 18 + 0.25 * (C.tamb - 18) : C.tamb;
+  const { act } = loadAt(C, S.t % 24);
+  APPLIANCES.forEach(a => S.prevOn[a.id] = !!act[a.id]);
+  return S;
+}
+function newEnergy() {
+  return { pvPot:0, pvShade:0, pvClip:0, pvUsed:0, pvLost:0, load:0, unserved:0,
+           gridLoad:0, gridChg:0, gridOut:0, batChg:0, batDis:0 };
+}
+
+function step(S, C, dtMin) {
+  const dt = dtMin / 60;
+  const h = S.t % 24;
+  const inv = INVERTERS[C.inv], eta = inv.eff / 100, k = C.vn / 48;
+  const al = [];
+  const add = (code, lvl, title, text) => al.push({ code, lvl, title, text });
+  const fmt = (x, d = 0) => (+x).toFixed(d);
+
+  /* --- орчин --- */
+  const g = sunFactor(h, C.season, C.cloud, S.t);
+  const Tloc = C.indoor ? 18 + 0.25 * (C.tamb - 18) : C.tamb;
+  const Tbat = Tloc;
+
+  /* --- PV ба MPPT --- */
+  const tcell = C.tamb + 25 * g;
+  const nPanels = C.series * (C.strings || 0);
+  const pvNom = Math.max(0, nPanels * PANEL.pmax * g * Math.max(0, 1 - 0.0035 * (tcell - 25)) * 0.92);
+  const sh = C.shading / 100;
+  const pvM = inv.mppt >= 2 ? pvNom * (1 - 0.5 * sh) : pvNom * (1 - 0.85 * sh);
+  const shadeLoss = pvNom - pvM;
+  const voc = C.series * PANEL.voc * (1 - 0.0028 * (tcell - 25));
+  const vmp = C.series * PANEL.vmp * (1 - 0.0030 * (tcell - 25));
+  const pvOVV = g > 0.01 && nPanels > 0 && voc > C.vpvmax;
+  const pvLOW = g > 0.02 && nPanels > 0 && !pvOVV && vmp < C.vpvmin;
+  let pvAvail = pvLOW ? 0 : Math.min(pvM, inv.pvmax);
+  const clipDC = pvM - pvAvail;
+  if (pvAvail < 15) pvAvail = 0;
+  if (sh > 0.05 && pvNom > 50 && inv.mppt < 2)
+    add('SHADE', 'warn', '1 MPPT: сүүдэр бүх хавтанд нөлөөлж байна',
+        'Нэг хавтан сүүдэртэхэд нийт чадал ' + fmt(shadeLoss) + ' Вт-аар буурлаа. 2 MPPT-тэй инвертер сүүдэртсэн бүлгийг тусад нь удирддаг.');
+  if (clipDC > 20)
+    add('CLIP', 'info', 'DC оролтын хязгаар',
+        'Инвертерийн PV оролтын дээд чадал ' + inv.pvmax + ' Вт тул ' + fmt(clipDC) + ' Вт хайчлагдаж байна (DC/AC харьцаа их).');
+
+  /* --- сүлжээ --- */
+  let gridAvail;
+  if (C.sysType === 'offgrid') gridAvail = false;
+  else if (C.gridMode === 'ok') gridAvail = true;
+  else if (C.gridMode === 'out') gridAvail = false;
+  else gridAvail = !(C.outFrom <= C.outTo ? (h >= C.outFrom && h < C.outTo) : (h >= C.outFrom || h < C.outTo));
+  const gridInSpec = C.gridV >= 207 && C.gridV <= 253 && C.gridF >= 49.6 && C.gridF <= 50.4;
+  const gridOK = gridAvail && gridInSpec;
+  if (gridAvail && !gridInSpec)
+    add('GRIDFAULT', 'fault', 'Grid Fault — сүлжээний алдаа',
+        'Сүлжээний хүчдэл ' + C.gridV + ' В, давтамж ' + C.gridF + ' Гц нь зөвшөөрөгдөх хязгаараас (207–253 В, 49.6–50.4 Гц; MNS 1778) гадуур тул инвертер сүлжээнээс салав.');
+  else if (gridAvail && (C.gridV < 218.5 || C.gridV > 241.5 || C.gridF < 49.8 || C.gridF > 50.2))
+    add('GRIDEDGE', 'warn', 'Сүлжээний чанар хязгаарт ойрхон',
+        'Хэвийн зөвшөөрөгдөх хэмжээ ±5% (218.5–241.5 В), ±0.2 Гц-ээс гарсан ч хязгаарын ±10%, ±0.4 Гц-ийн дотор байна.');
+
+  /* --- батарей --- */
+  const ocv = ocvAt(S.soc, C.chem, C.vn);
+  const R = battR(C);
+  const capFactor = Math.min(1, Math.max(0.5, 1 + 0.008 * (Tbat - 20)));
+  const capWh = C.ah * C.vn * capFactor;
+  const bmax = battVmax(C);
+  let chgBlocked = false;
+  if (C.sysType !== 'ongrid') {
+    if (C.chem === 'lfp' && Tbat < 0) {
+      chgBlocked = true;
+      add('CHGBLOCK', 'warn', 'BMS цэнэглэлтийг хаалаа',
+          'LFP батарейг 0°C-ээс доош температурт цэнэглэж болохгүй (BMS хамгаалалт). Батарейг дулаан газар байрлуул эсвэл халаагуурт батарей ашигла.');
+    }
+    if (C.vabs > bmax) {
+      chgBlocked = true;
+      add('BATOVV', 'fault', 'Over Voltage — батарейн хэт хүчдэл',
+          'Цэнэглэх хүчдэл ' + fmt(C.vabs, 1) + ' В нь батарейн дээд хязгаар ' + fmt(bmax, 1) + ' В-оос их тул цэнэглэлт хаагдав.');
+    }
+  }
+  const taper = S.soc > 0.88 ? Math.max(0.03, (1 - S.soc) / 0.12) : 1;
+  const IchgCap = (chgBlocked || S.soc >= 0.999) ? 0 : Math.min(C.maxChgA, Math.max(0, (C.vabs - ocv) / R)) * taper;
+  const PchgCap = IchgCap * (ocv + IchgCap * R);
+  const IdisMax = S.soc <= 0.001 ? 0 : Math.max(0, Math.min(150, (ocv - C.vcut) / R));
+  const PdisCap = IdisMax * (ocv - IdisMax * R);
+
+  /* --- ачаалал --- */
+  const { L, act } = loadAt(C, h);
+  let surgeExtra = 0;
+  for (const a of APPLIANCES) {
+    if (act[a.id] && !S.prevOn[a.id] && a.surge > 1 && dtMin > 0) S.surgeUntil[a.id] = S.t + 4 / 60;
+    if (dtMin > 0) S.prevOn[a.id] = !!act[a.id];
+    if (act[a.id] && S.surgeUntil[a.id] > S.t) surgeExtra += C.apps[a.id].w * (a.surge - 1);
+  }
+
+  /* --- инвертерийн төлөв --- */
+  let invOn = true;
+  if (gridOK && (S.latch === 'LOWV' || S.latch === 'OVERLOAD')) S.latch = null;
+  if (Tloc < inv.tmin) {
+    invOn = false;
+    add('COLD', 'fault', 'Ажиллах температураас хүйтэн',
+        'Инвертерийн ажиллах доод температур ' + inv.tmin + '°C, одоогийн орчин ' + fmt(Tloc, 0) + '°C. Хүйтэнд электроник саатаж, конденсац үүснэ — дулаан байранд суурил.');
+  }
+  if (S.latch === 'OVERTEMP') {
+    if (S.tinv < inv.tmax - 8) S.latch = null; else invOn = false;
+  }
+  if (S.latch === 'OVERLOAD') {
+    if (C.autoReset && (S.t - S.latchT) * 60 >= 2) S.latch = null; else invOn = false;
+  }
+  if (S.latch === 'LOWV') {
+    if (ocv >= C.vrestart) S.latch = null; else invOn = false;
+  }
+  if (invOn && S.tinv >= inv.tmax) {
+    S.latch = 'OVERTEMP'; invOn = false;
+  }
+  if (S.latch === 'OVERTEMP')
+    add('OVERTEMP', 'fault', 'Over Temperature — хэт халалтын алдаа',
+        'Инвертерийн температур ' + fmt(S.tinv) + '°C дээд хязгаар ' + inv.tmax + '°C-д хүрсэн тул хамгаалалт ажиллав. ' + (inv.tmax - 8) + '°C-аас доош хөрмөгц дахин асна. Шийдэл: сэрүүн газар байрлуулах, сэнс, агааржуулалт шалгах.');
+  const derate = S.tinv > inv.tmax - 10 ? Math.max(0.4, 1 - 0.6 * (S.tinv - (inv.tmax - 10)) / 10) : 1;
+  if (derate < 1 && invOn)
+    add('DERATE', 'warn', 'Халалтаас чадал буурч байна',
+        'Инвертерийн температур ' + fmt(S.tinv) + '°C тул гаралтын чадал нэрлэсний ' + fmt(derate * 100) + '%-д хязгаарлагдлаа.');
+
+  /* --- урсгал --- */
+  const Pcap0 = inv.pn * derate;
+  let Pcap = invOn ? Pcap0 : 0;
+  const pvOffByOVV = pvOVV;
+  let pvDC = (invOn && !pvOffByOVV) ? pvAvail : 0;
+  if (pvLOW) add('PVLOW', 'warn', 'PV хүчдэл MPPT-ийн доод хүчдэлээс бага', 'String-ийн Vmp ≈ ' + fmt(vmp) + ' В нь инвертерийн MPPT-ийн эхлэх хүчдэл ' + C.vpvmin + ' В-оос бага тул нарны эрчим хүч ашиглагдахгүй байна. Хавтанг цуваа илүү олноор холбоно.');
+  if (pvOffByOVV)
+    add('OVV', 'fault', 'Over Voltage — хэт хүчдэлийн алдаа',
+        'Хавтангийн хоосон ажиллагааны хүчдэл Voc = ' + fmt(voc, 1) + ' В нь инвертерийн оролтын дээд хязгаар ' + C.vpvmax + ' В-оос хэтэрсэн (хүйтэнд хүчдэл өснө). Инвертер PV оролтыг салгав.');
+
+  let pvLoad = 0, batAC = 0, gridLoad = 0, gridChgDC = 0, pToBat = 0, exp = 0, served = 0;
+  let notes = [];
+
+  if (C.sysType === 'ongrid') {
+    if (!gridOK) {
+      pvDC = 0; served = 0;
+      if (gridAvail === false || !gridInSpec)
+        add('ANTIISLAND', 'fault', 'Сүлжээ байхгүй — систем унтарлаа',
+            'Сүлжээтэй зэрэгцээ инвертер сүлжээ тасрахад аюулгүй байдлын үүднээс унтардаг (anti-islanding). Батарей байхгүй тул ачаалал тэжээлгүй үлдэнэ.');
+    } else {
+      const pvAC = Math.min(pvDC * eta, Pcap);
+      pvLoad = Math.min(L, pvAC);
+      gridLoad = L - pvLoad;
+      exp = pvAC - pvLoad;
+      served = L;
+      pToBat = 0;
+    }
+  } else {
+    /* hybrid / off-grid */
+    const mode = C.mode;
+    let xfer = S.xfer;
+    if (mode === 'SBU' && gridOK) {
+      if (!xfer && S.vt < C.vswitch) xfer = true;
+      else if (xfer && ocv >= C.vreturn) xfer = false;
+    } else xfer = false;
+    S.xfer = xfer;
+    if (xfer) add('XFER', 'info', 'SBU: ачаалал сүлжээнд шилжсэн (bypass)',
+        'Батарейн хүчдэл ' + C.vswitch.toFixed(1) + ' В-оос буурсан тул ачааллыг сүлжээнээс тэжээж байна. ' + C.vreturn.toFixed(1) + ' В-оос дээш болоход батарей руу буцна.');
+
+    const inPeak = mode === 'PEAK' && h >= C.peakFrom && h < C.peakTo;
+    const nightPre = mode === 'PEAK' && (C.preFrom > C.preTo ? (h >= C.preFrom || h < C.preTo) : (h >= C.preFrom && h < C.preTo));
+
+    const pvACmax = Math.min(pvDC * eta, Pcap);
+    let pvFeeds = true;
+    if (gridOK && mode === 'USB') pvFeeds = false;
+    if (xfer) pvFeeds = false;
+
+    let rem = L;
+    if (invOn && pvFeeds) { pvLoad = Math.min(rem, pvACmax); rem -= pvLoad; }
+
+    let useBatt, gridCap = Infinity;
+    if (!gridOK) useBatt = true;
+    else if (mode === 'SBU') useBatt = !xfer;
+    else if (mode === 'SELF') useBatt = S.soc > C.reserve / 100;
+    else if (mode === 'PEAK') { useBatt = inPeak && S.soc > C.reserve / 100; if (inPeak) gridCap = C.peakThr; }
+    else useBatt = false;
+
+    let failed = null;
+    if (rem > 0.5) {
+      if (!invOn) {
+        if (gridOK) gridLoad = rem; // bypass
+        rem = gridOK ? 0 : rem;
+      } else if (useBatt) {
+        const room = Math.max(0, Pcap - pvLoad);
+        let want = rem;
+        if (gridOK && gridCap < Infinity) want = Math.max(0, rem - gridCap);
+        const battAC = eta * PdisCap;
+        let b = Math.min(want, room, battAC);
+        batAC = b; rem -= b;
+        if (rem > 0.5) {
+          if (gridOK) {
+            gridLoad = rem; rem = 0;
+            if (want > room + 0.5) add('BYPASS', 'info', 'Overload → bypass', 'Ачаалал инвертерийн чадлаас их тул илүүдлийг сүлжээ шууд нөхөж байна.');
+          } else {
+            failed = want > room + 0.5 ? 'OVERLOAD' : 'LOWV';
+          }
+        }
+      } else {
+        if (gridOK) { gridLoad = rem; rem = 0; }
+        else failed = 'LOWV';
+      }
+    }
+    /* эхлэх гүйдэл (surge) */
+    if (!failed && invOn && !gridOK && (pvLoad + batAC) > 0 && (pvLoad + batAC + surgeExtra) > 2 * inv.pn) failed = 'OVERLOAD';
+
+    if (failed) {
+      S.latch = failed; S.latchT = S.t;
+      pvLoad = 0; batAC = 0; gridLoad = 0; invOn = false; Pcap = 0;
+      pvDC = (!pvOffByOVV && Tloc >= inv.tmin) ? pvAvail : 0;
+      if (failed === 'LOWV')
+        add('LOWV', 'fault', 'Low Voltage — бага хүчдэлийн алдаа',
+            'Ачаалалтай үеийн батарейн хүчдэл cut-off ' + C.vcut.toFixed(1) + ' В-оос буурсан тул инвертер унтарлаа. Шийдэл: батарейг цэнэглэх, ачааллыг багасгах, холболтыг шалгах.');
+      else
+        add('OVERLOAD', 'fault', 'Overload — хэт ачааллын алдаа',
+            'Ачаалал ' + fmt(L) + ' Вт (эхлэх гүйдэлтэй ' + fmt(L + surgeExtra) + ' Вт) инвертерийн чадал ' + fmt(Pcap0) + ' Вт (surge ' + 2 * inv.pn + ' Вт)-аас их. Шийдэл: ачааллыг бууруулах, илүү өндөр чадлын инвертер. «Алдаа арилгах» дар.');
+    }
+    if (S.latch === 'LOWV' && !failed)
+      add('LOWV', 'fault', 'Low Voltage — бага хүчдэлийн алдаа',
+          'Батарейн хоосон хүчдэл ' + fmt(ocv, 1) + ' В нь сэргэх хүчдэл ' + C.vrestart.toFixed(1) + ' В-оос бага. Батарей цэнэглэгдтэл инвертер унтарсан хэвээр.');
+    if (S.latch === 'OVERLOAD' && !failed)
+      add('OVERLOAD', 'fault', 'Overload — инвертер зогссон',
+          'Ачааллыг багасгаад «Алдаа арилгах» дарж дахин асаана.');
+
+    served = pvLoad + batAC + gridLoad;
+
+    /* илүүдэл PV → батарей */
+    const pvUsedForLoad = pvLoad / eta;
+    let surplus = Math.max(0, pvDC - pvUsedForLoad);
+    pToBat = Math.min(surplus, PchgCap);
+    /* сүлжээнээс цэнэглэх */
+    if (gridOK) {
+      let allow = C.gridCharge;
+      if (nightPre) allow = S.soc < C.preSoc / 100;
+      if (allow && S.latch !== 'OVERTEMP' && Tloc >= inv.tmin) {
+        const room = Math.max(0, PchgCap - pToBat);
+        gridChgDC = Math.min(room, C.maxGridChgA * C.vn);
+        if (nightPre && S.soc >= C.preSoc / 100) gridChgDC = 0;
+      }
+    }
+    const left = surplus - pToBat;
+    if (left > 1 && gridOK && (C.export || mode === 'SELF') && invOn) exp = Math.min(left * eta, Math.max(0, Pcap - pvLoad));
+    const pvUsedTotal = pvUsedForLoad + pToBat + exp / eta;
+    S.flow.curt = Math.max(0, pvAvail - pvUsedTotal);
+    S.flow.pvUsedDC = pvUsedTotal;
+    
+  }
+
+  if (C.sysType === 'ongrid') {
+    S.flow.pvUsedDC = (pvLoad + exp) / eta;
+    S.flow.curt = Math.max(0, pvAvail - S.flow.pvUsedDC);
+  }
+
+  /* --- батарей: гүйдэл, хүчдэл, SOC --- */
+  const batDisDC = batAC / eta;
+  let Ic = 0, Id = 0;
+  const Pin = pToBat + gridChgDC;
+  if (Pin > 0 && R > 0) Ic = (-ocv + Math.sqrt(ocv * ocv + 4 * R * Pin)) / (2 * R);
+  if (batDisDC > 0 && R > 0) {
+    const disc = ocv * ocv - 4 * R * batDisDC;
+    Id = disc > 0 ? (ocv - Math.sqrt(disc)) / (2 * R) : ocv / (2 * R);
+  }
+  let vt = ocv;
+  if (Ic > 0) vt = Math.min(ocv + Ic * R, Math.max(C.vabs, ocv));
+  else if (Id > 0) vt = ocv - Id * R;
+  S.vt = vt;
+  if (dtMin > 0 && C.sysType !== 'ongrid') {
+    S.soc += (ocv * Ic * 0.985 - ocv * Id) * dt / capWh;
+    S.soc = Math.min(1, Math.max(0, S.soc));
+  }
+
+  /* --- температур --- */
+  const Pproc = pvLoad + batAC + exp + Pin;
+  const loss = (invOn || Pproc > 0 ? 20 : 8) + Pproc * (1 - eta);
+  const rth = C.fanOK ? 0.05 : 0.14;
+  const Tmount = Tloc + (C.indoor ? 0 : 8 * Math.min(1, g * 1.2));
+  const Ttarget = Tmount + rth * loss;
+  if (dtMin > 0) S.tinv += (Ttarget - S.tinv) * (1 - Math.exp(-dtMin / 20));
+
+  /* --- энерги --- */
+  if (dtMin > 0) {
+    const E = S.E;
+    E.pvPot += pvNom * dt; E.pvShade += shadeLoss * dt; E.pvClip += clipDC * dt;
+    E.pvUsed += (S.flow.pvUsedDC || 0) * dt;
+    E.pvLost += (S.flow.curt || 0) * dt;
+    E.load += L * dt; E.unserved += Math.max(0, L - served) * dt;
+    E.gridLoad += gridLoad * dt; E.gridChg += (gridChgDC / eta) * dt; E.gridOut += exp * dt;
+    E.batChg += Pin * dt; E.batDis += batDisDC * dt;
+  }
+
+  /* --- дүрслэлд зориулсан тайлбар --- */
+  const desc = [];
+  if (pvLoad > 1) desc.push('Нар → ачаалал');
+  if (pToBat > 1) desc.push('Нар → батарей');
+  if (batAC > 1) desc.push('Батарей → ачаалал');
+  if (gridLoad > 1) desc.push('Сүлжээ → ачаалал');
+  if (gridChgDC > 1) desc.push('Сүлжээ → батарей');
+  if (exp > 1) desc.push('Нар → сүлжээ');
+  if (!desc.length) desc.push(invOn ? 'Зогсонги' : 'Унтарсан');
+
+  Object.assign(S.flow, {
+    h, g, pvNom, pvM, voc, vmp, nPanels, vocLimit: C.vpvmax, tcell, shadeLoss, clipDC,
+    L, served, pvLoad, vmp, nPanels, batAC, batDisDC, gridLoad, gridChgDC, gridChgAC: gridChgDC / eta, pToBat, exp,
+    gridImport: gridLoad + gridChgDC / eta, ocv, vt, ib: Ic > 0 ? -Ic : Id, soc: S.soc,
+    tinv: S.tinv, Tloc, Pcap: Pcap0, invOn, gridOK, gridAvail, gridInSpec, derate,
+    batNet: batDisDC - Pin, desc, eta, capWh, chgBlocked
+  });
+  if (dtMin > 0) S.t += dt;
+  S.alerts = al;
+  return S;
+}
+
+/* 24 цагийн headless туршилт (горим харьцуулахад) */
+function runDay(C0, mode) {
+  const C = JSON.parse(JSON.stringify(C0));
+  C.mode = mode; C.sysType = 'hybrid'; C.startH = 0;
+  const S = newState(C);
+  const lowv = { mins: 0 };
+  for (let i = 0; i < 1440; i++) {
+    step(S, C, 1);
+    if (S.latch) lowv.mins++;
+  }
+  const E = S.E, cap = C.ah * C.vn;
+  const k = x => x / 1000;
+  return {
+    mode, pvUsed: k(E.pvUsed), pvLost: k(E.pvLost + 0), pvPot: k(E.pvPot),
+    load: k(E.load), unserved: k(E.unserved), gridIn: k(E.gridLoad + E.gridChg),
+    gridLoad: k(E.gridLoad), gridOut: k(E.gridOut), batDis: k(E.batDis),
+    cycles: E.batDis / cap, soc: S.soc * 100,
+    self: E.load > 0 ? Math.max(0, 1 - (E.gridLoad / E.load)) * 100 : 0,
+    faultMin: lowv.mins
+  };
+}
+
+/* DC/AC харьцааны өдрийн загвар (clipping) */
+function dcacDay(kWp, acW, season) {
+  const s = SEASONS[season];
+  const pts = []; let eDC = 0, eAC = 0, eClip = 0;
+  const eta = 0.97;
+  for (let m = 0; m < 1440; m += 6) {
+    const h = m / 60;
+    const x = (h - s.sr) / (s.ss - s.sr);
+    let g = 0;
+    if (x > 0 && x < 1) g = s.pk * Math.pow(Math.sin(Math.PI * x), 1.15);
+    const dc = kWp * 1000 * g * 0.85;
+    const ac = Math.min(dc * eta, acW);
+    pts.push({ h, dc: dc * eta, ac });
+    eDC += dc * eta * 0.1; eAC += ac * 0.1; eClip += Math.max(0, dc * eta - acW) * 0.1;
+  }
+  return { pts, eDC: eDC / 1000, eAC: eAC / 1000, eClip: eClip / 1000, clipPct: eDC > 0 ? 100 * eClip / eDC : 0 };
+}
+
+if (typeof module !== 'undefined') module.exports = { INVERTERS, SEASONS, APPLIANCES, defaultCfg, newState, step, runDay, dcacDay, ocvAt, battR };
+
+/* ===================== ХОЛБОЛТЫН ЛАБОРАТОРИ ===================== */
+const BT = {
+  pv:    { name:'Jinko 605 Вт хавтан', short:'PV', w:66, h:100, role:'Jinko JKM605N-78HL4-BDV: 605 Вт, Vmp 45.42 В, Imp 13.32 А, АҮК 21.64%, 2465×1134×35 мм. Хавтан бүрийг цуваа/параллель холбоно.', terms:[{ id:'p', t:'p', x:16, y:100, lab:'+' }, { id:'m', t:'m', x:50, y:100, lab:'−' }] },
+  dcbrk: { name:'DC автомат', short:'DC', w:72, h:92, role:'PV эсвэл батарейн DC хэлхээг хамгаалж, салгана.', pass:[['inP', 'outP'], ['inM', 'outM']], sw:true,
+           terms:[{ id:'inP', t:'p', x:20, y:0, lab:'+' }, { id:'inM', t:'m', x:52, y:0, lab:'−' }, { id:'outP', t:'p', x:20, y:92, lab:'+' }, { id:'outM', t:'m', x:52, y:92, lab:'−' }] },
+  bat:   { name:'Батарей 48 В 100 Ач', short:'BAT', w:124, h:72, role:'Энергийг хуримтлуулна (48 В, 100 Ач, BMS-тэй).', terms:[{ id:'p', t:'p', x:34, y:72, lab:'+' }, { id:'m', t:'m', x:90, y:72, lab:'−' }] },
+  inv:   { name:'Хосолмол инвертер', short:'INV', w:320, h:140, role:'MPPT, DC/AC хувиргалт, батарей цэнэглэх, горим удирдах.', max:1,
+           terms:[{ id:'pvP', t:'p', x:40, y:0, lab:'PV+' }, { id:'pvM', t:'m', x:90, y:0, lab:'PV−' }, { id:'batP', t:'p', x:190, y:0, lab:'BAT+' }, { id:'batM', t:'m', x:240, y:0, lab:'BAT−' },
+                  { id:'gL', t:'L', x:40, y:140, lab:'ГРИД L' }, { id:'gN', t:'N', x:90, y:140, lab:'N' }, { id:'lL', t:'L', x:210, y:140, lab:'АЧ. L' }, { id:'lN', t:'N', x:260, y:140, lab:'N' }] },
+  acbrk: { name:'AC автомат', short:'AC', w:72, h:92, role:'Сүлжээ ба ачааллын AC хэлхээг хамгаална.', pass:[['inL', 'outL'], ['inN', 'outN']], sw:true,
+           terms:[{ id:'inL', t:'L', x:20, y:0, lab:'L' }, { id:'inN', t:'N', x:52, y:0, lab:'N' }, { id:'outL', t:'L', x:20, y:92, lab:'L' }, { id:'outN', t:'N', x:52, y:92, lab:'N' }] },
+  meter: { name:'Тоолуур', short:'kWh', w:80, h:92, role:'Хэрэглэсэн энергийг кВт·цагаар тооцно.', pass:[['inL', 'outL'], ['inN', 'outN']],
+           terms:[{ id:'inL', t:'L', x:22, y:0, lab:'L' }, { id:'inN', t:'N', x:58, y:0, lab:'N' }, { id:'outL', t:'L', x:22, y:92, lab:'L' }, { id:'outN', t:'N', x:58, y:92, lab:'N' }] },
+  grid:  { name:'Сүлжээ 230 В', short:'GRID', w:100, h:66, role:'Цахилгаан эрчим хүчний систем (230 В, 50 Гц).', terms:[{ id:'L', t:'L', x:28, y:0, lab:'L' }, { id:'N', t:'N', x:72, y:0, lab:'N' }] },
+  lights:{ name:'Гэрэлтүүлэг', short:'Гэрэл', w:100, h:76, app:'lights', role:'Ачаалал 150 Вт.', terms:null },
+  fridge:{ name:'Хөргөгч', short:'Хөргөгч', w:100, h:76, app:'fridge', role:'Ачаалал 120 Вт, эхлэх гүйдэл ихтэй.', terms:null },
+  kettle:{ name:'Цахилгаан данх', short:'Данх', w:100, h:76, app:'kettle', role:'Ачаалал 1800 Вт.', terms:null },
+  pump:  { name:'Усны шахуурга (мотор)', short:'Шахуурга', w:100, h:76, app:'pump', role:'Ачаалал 750 Вт, эхлэх гүйдэл ×3.', terms:null },
+  heater:{ name:'Цахилгаан халаагуур', short:'Халаагуур', w:100, h:76, app:'heater', role:'Ачаалал 1500 Вт.', terms:null }
+};
+['lights', 'fridge', 'kettle', 'pump', 'heater'].forEach(k => { BT[k].terms = [{ id:'L', t:'L', x:30, y:0, lab:'L' }, { id:'N', t:'N', x:70, y:0, lab:'N' }]; });
+APPLIANCES.forEach(a => { if (!BT[a.id]) BT[a.id] = { name:a.name, short:a.name.split(' ')[0], w:100, h:76, app:a.id, role:'Ачаалал ' + a.w + ' Вт.', generic:a.w, terms:[{ id:'L', t:'L', x:30, y:0, lab:'L' }, { id:'N', t:'N', x:70, y:0, lab:'N' }] }; });
+const PALETTE = [
+  ['Үүсвэр ба хуримтлуур', ['pv', 'bat', 'grid']],
+  ['Хамгаалалт ба хэмжилт', ['dcbrk', 'acbrk', 'meter']],
+  ['Хувиргуур', ['inv']],
+  ['Ачаалал', APPLIANCES.map(a => a.id)]
+];
+const PORTN = { pvP:'PV+', pvM:'PV−', batP:'BAT+', batM:'BAT−', gL:'Сүлжээний L', gN:'Сүлжээний N', lL:'Ачааллын L', lN:'Ачааллын N' };
+const TCOL = { p:'#C62828', m:'#1B2A38', L:'#A8631A', N:'#2A5CA8' };
+const BENCH = { comps:[], wires:[], nid:1, sel:null, pending:null, drag:null, ev:null, key:null, hist:[], hl:null, mouse:null, req:null };
+let benchHook = null;
+const BSTATE = {};
+const BW = 1360, BH = 900;
+
+function benchSnap() { return JSON.stringify({ comps:BENCH.comps, wires:BENCH.wires, nid:BENCH.nid }); }
+function benchPush(snap) { BENCH.hist.push(snap || benchSnap()); if (BENCH.hist.length > 60) BENCH.hist.shift(); }
+function benchUndo() {
+  const h = BENCH.hist.pop(); if (!h) { $('#benchHint').textContent = 'Буцаах үйлдэл алга.'; return; }
+  const o = JSON.parse(h); BENCH.comps = o.comps; BENCH.wires = o.wires; BENCH.nid = o.nid; BENCH.sel = null; BENCH.pending = null; BENCH.hl = null; renderBench();
+}
+function benchSwap(key) {
+  if (BENCH.key) BSTATE[BENCH.key] = { comps:BENCH.comps, wires:BENCH.wires, nid:BENCH.nid, hist:BENCH.hist };
+  BENCH.key = key; const st = BSTATE[key] || { comps:[], wires:[], nid:1, hist:[] };
+  Object.assign(BENCH, { comps:st.comps, wires:st.wires, nid:st.nid, hist:st.hist, sel:null, pending:null, hl:null, drag:null });
+  if ($('#bench')) renderBench();
+}
+function benchAdd(type, x, y, extra) {
+  const c = Object.assign({ id:'c' + (BENCH.nid++), type, x, y, on:true }, extra || {});
+  BENCH.comps.push(c); return c;
+}
+function benchTermMap() {
+  const m = {};
+  BENCH.comps.forEach(c => BT[c.type].terms.forEach(t => { m[c.id + '.' + t.id] = { c, t, x:c.x + t.x, y:c.y + t.y }; }));
+  return m;
+}
+function benchUF(map, mode) {
+  const par = {};
+  Object.keys(map).forEach(k => par[k] = k);
+  const find = a => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; };
+  const un = (a, b) => { par[find(a)] = find(b); };
+  BENCH.wires.forEach(w => { if (par[w.a] !== undefined && par[w.b] !== undefined) un(w.a, w.b); });
+  BENCH.comps.forEach(c => {
+    const p = BT[c.type].pass; if (!p) return;
+    const closed = mode === 'closed' || (mode === 'cur' && (c.on || !BT[c.type].sw));
+    if (closed || (mode === 'open' && !BT[c.type].sw)) p.forEach(([a, b]) => un(c.id + '.' + a, c.id + '.' + b));
+  });
+  return { find, same:(a, b) => find(a) === find(b) };
+}
+function pvStrings(cur, inv) {
+  const panels = BENCH.comps.filter(c => c.type === 'pv');
+  const net = id => cur.find(id);
+  const top = net(inv.id + '.pvP'), bot = net(inv.id + '.pvM');
+  const info = panels.map(c => ({ c, pn:net(c.id + '.p'), mn:net(c.id + '.m') }));
+  const used = new Set(), strings = [], rev = [];
+  info.forEach(i => { if (i.pn === bot || i.mn === top) rev.push(i.c); });
+  info.filter(i => i.pn === top && i.mn !== top).forEach(start => {
+    let cu = start, len = 1, ok = false; const seen = new Set([start.c.id]);
+    for (let k = 0; k < 40; k++) {
+      if (cu.mn === bot) { ok = true; break; }
+      const nx = info.find(i => !seen.has(i.c.id) && i.pn === cu.mn && i.pn !== top);
+      if (!nx) break; seen.add(nx.c.id); cu = nx; len++;
+    }
+    if (ok) { strings.push(len); seen.forEach(id => used.add(id)); }
+  });
+  return { panels, strings, orphans:panels.filter(c => !used.has(c.id)), rev, count:used.size };
+}
+function evalBench() {
+  const map = benchTermMap();
+  const cur = benchUF(map, 'cur'), closed = benchUF(map, 'closed'), open = benchUF(map, 'open');
+  const msgs = [], badW = new Set(); let errors = 0;
+  const add = (l, t) => { if (msgs.some(m => m.t === t)) return; msgs.push({ l, t }); if (l === 'err') errors++; };
+  const inv = BENCH.comps.find(c => c.type === 'inv');
+  const has = { pv:0, bat:0, grid:false, loads:[], pvN:0, pvC:0 };
+  let unprot = false;
+  if (!BENCH.comps.length) { add('info', 'Самбар хоосон байна. Зүүн талаас эд анги нэмж эсвэл жишээ схем ачаална уу.'); return { msgs, errors:0, has, canApply:false, badW, unprot:false }; }
+  /* wire бүрийн төрөл таарч байгаа эсэх */
+  BENCH.wires.forEach((w, i) => {
+    const a = map[w.a], b = map[w.b]; if (!a || !b) return;
+    if (a.t.t !== b.t.t && !(a.c.type === 'pv' && b.c.type === 'pv')) badW.add(i);
+  });
+  /* туйл, фаз зөрсөн утас */
+  BENCH.wires.forEach((w, i) => {
+    if (badW.has(i)) add('err', 'Туйл/фаз зөрсөн утас: «' + map[w.a].t.lab + '» терминалыг «' + map[w.b].t.lab + '» терминалтай холбосон байна.');
+  });
+  /* богино залгаа: нэг үүсвэр/ачааллын хоёр терминал нэг цэгт */
+  BENCH.comps.forEach(c => {
+    const ts = BT[c.type].terms;
+    if (!(c.type === 'pv' || c.type === 'bat' || c.type === 'grid' || BT[c.type].app)) return;
+    if (cur.same(c.id + '.' + ts[0].id, c.id + '.' + ts[1].id)) {
+      add('err', BT[c.type].name + ': хоёр терминал нэг цэгт холбогдсон — БОГИНО ЗАЛГАА!');
+      BENCH.wires.forEach((w, i) => { if (cur.same(w.a, c.id + '.' + ts[0].id)) badW.add(i); });
+    }
+  });
+  if (!inv) { add('err', 'Инвертер байхгүй. «Хосолмол инвертер»-ийг нэмнэ үү.'); return { msgs, errors, has, canApply:false, badW, unprot:false }; }
+  const status = (c, tid, port) => {
+    const a = c.id + '.' + tid, b = inv.id + '.' + port;
+    if (cur.same(a, b)) return 'ok';
+    if (closed.same(a, b)) return 'open';
+    for (const q of Object.keys(PORTN)) if (q !== port && closed.same(a, inv.id + '.' + q)) return 'wrong:' + q;
+    return 'none';
+  };
+  const pair = (c, t1, p1, t2, p2, label) => {
+    const s1 = status(c, t1, p1), s2 = status(c, t2, p2);
+    if (s1 === 'ok' && s2 === 'ok') {
+      add('ok', label + ': инвертертэй зөв холбогдсон.');
+      const a = c.id + '.' + t1, b = inv.id + '.' + p1;
+      if (open.same(a, b) || open.same(c.id + '.' + t2, inv.id + '.' + p2))
+        { add('warn', label + ': инвертертэй автоматгүй, шууд холбогдсон. Хамгаалалтын автомат тавих шаардлагатай.'); unprot = true; }
+      return true;
+    }
+    [[s1, t1, p1], [s2, t2, p2]].forEach(([s, t, p]) => {
+      const tl = BT[c.type].terms.find(x => x.id === t).lab;
+      if (s === 'ok') return;
+      if (s === 'open') add('err', label + ' (' + tl + ' → ' + PORTN[p] + '): автомат салгагдсан байна. Хөшүүргийг асаана уу.');
+      else if (s.startsWith('wrong:')) add('err', label + ' (' + tl + '): ' + PORTN[s.slice(6)] + ' оролт руу буруу холбогдсон, зөв нь ' + PORTN[p] + '.');
+      else add('err', label + ' (' + tl + ' → ' + PORTN[p] + '): холбогдоогүй.');
+    });
+    return false;
+  };
+  BENCH.comps.forEach(c => {
+    if (c.type === 'bat') { if (pair(c, 'p', 'batP', 'm', 'batM', 'Батарей')) has.bat = true; }
+    if (c.type === 'grid') { if (pair(c, 'L', 'gL', 'N', 'gN', 'Сүлжээ')) has.grid = true; }
+    if (BT[c.type].app) { if (pair(c, 'L', 'lL', 'N', 'lN', BT[c.type].name)) has.loads.push(BT[c.type].app); }
+  });
+  const pvs = BENCH.comps.filter(c => c.type === 'pv');
+  if (pvs.length) {
+    const st = pvStrings(cur, inv);
+    has.pvN = pvs.length; has.pvC = st.count; has.strings = st.strings;
+    if (st.rev.length) add('err', 'Нарны хавтангийн туйл урвуу холбогдсон байна (PV+ ба PV− солигдсон).');
+    pvs.forEach(c => ['p', 'm'].forEach(t => { for (const q of ['batP', 'batM', 'gL', 'gN', 'lL', 'lN']) if (closed.same(c.id + '.' + t, inv.id + '.' + q)) add('err', 'Нарны хавтан ' + PORTN[q] + ' оролт руу буруу холбогдсон. PV хавтан зөвхөн PV+ / PV− оролтод холбогдоно.'); }));
+    const orph = st.orphans.filter(c => !st.rev.includes(c));
+    if (orph.length) add('err', orph.length + ' хавтан string-д бүрэн холбогдоогүй байна. Хавтангуудыг цуваа холбож (нэгийнх нь «−» дараагийнх нь «+»), string-ийн эхийг PV+, төгсгөлийг PV− руу холбоно.');
+    if (st.strings.length) {
+      const n0 = Math.min(...st.strings);
+      if (st.strings.some(x => x !== n0)) add('err', 'Параллель string-үүдийн хавтангийн тоо тэнцүү биш (' + st.strings.join(', ') + '). Тэнцүү болгоно уу.');
+      else if (!orph.length && !st.rev.length) {
+        has.pv = true; has.pvSeries = n0; has.pvStrings = st.strings.length;
+        add('ok', 'Нарны массив: ' + st.strings.length + ' string × ' + n0 + ' хавтан цуваа = ' + (n0 * st.strings.length * PANEL.pmax) + ' Вт. String Voc ≈ ' + (n0 * PANEL.voc).toFixed(0) + ' В, Vmp ≈ ' + (n0 * PANEL.vmp).toFixed(0) + ' В, Imp ' + (PANEL.imp * st.strings.length).toFixed(1) + ' А.');
+        if (n0 * PANEL.voc > C.vpvmax) add('warn', 'String-ийн Voc (' + (n0 * PANEL.voc).toFixed(0) + ' В) инвертерийн PV оролтын дээд хүчдэл ' + C.vpvmax + ' В-оос их байна.');
+        if (n0 * PANEL.vmp < C.vpvmin) add('warn', 'String-ийн Vmp (' + (n0 * PANEL.vmp).toFixed(0) + ' В) MPPT-ийн доод хүчдэл ' + C.vpvmin + ' В-оос бага. Цуваа хавтан нэмнэ.');
+        if (pvs.some(c => open.same(c.id + '.p', inv.id + '.pvP') && closed.same(c.id + '.p', inv.id + '.pvP'))) { add('warn', 'Нарны массив инвертертэй автоматгүй шууд холбогдсон. DC автомат тавина уу.'); unprot = true; }
+      }
+    }
+  }
+  const canApply = errors === 0 && has.pv && (has.bat || has.grid);
+  if (errors === 0 && !has.pv) add('err', 'Нарны хавтан холбогдоогүй. Хавтангуудыг цуваа холбож PV+ / PV− оролтод холбоно уу.');
+  if (errors === 0 && has.pv && !has.bat && !has.grid) add('err', 'Батарей ч, сүлжээ ч холбогдоогүй. Ядаж нэгийг нь холбоно уу.');
+  if (canApply && !has.loads.length) add('warn', 'Ачаалал холбоогүй байна. Ачаалал нэмбэл симулятор түүгээр ажиллана.');
+  if (canApply) {
+    const t = has.bat ? (has.grid ? 'Хосолмол систем' : 'Сүлжээнээс тусдаа систем') : 'Сүлжээтэй зэрэгцээ систем';
+    add('ok', 'Схем зөв. Төрөл: ' + t + '. «Симуляторт ачаалах» дарж ажиллуулна уу.');
+  }
+  return { msgs, errors, has, canApply, badW, unprot };
+}
+
+/* ---------- Зурах ---------- */
+function compSVG(c) {
+  const d = BT[c.type], w = d.w, h = d.h, ink = 'var(--ink)';
+  let s = '<rect width="' + w + '" height="' + h + '" rx="3" style="fill:var(--panel);stroke:' + ink + ';stroke-width:1.5"/>';
+  const T = (x, y, t, sz, fill, anchor) => '<text x="' + x + '" y="' + y + '" text-anchor="' + (anchor || 'middle') + '" style="font:' + (sz || 11) + 'px var(--fontc);fill:' + (fill || 'var(--ink)') + '">' + t + '</text>';
+  switch (c.type) {
+    case 'pv':
+      s = '<rect width="66" height="100" rx="2" style="fill:#1F3D63;stroke:' + ink + ';stroke-width:1.5"/>';
+      for (let i = 1; i < 3; i++) s += '<line x1="' + i * 22 + '" y1="4" x2="' + i * 22 + '" y2="76" style="stroke:#7FA3CF;stroke-width:1"/>';
+      for (let j = 1; j < 8; j++) s += '<line x1="4" y1="' + (4 + j * 9) + '" x2="62" y2="' + (4 + j * 9) + '" style="stroke:#7FA3CF;stroke-width:.8"/>';
+      s += T(33, 90, '605 Вт', 10, '#fff'); break;
+    case 'bat':
+      s += '<rect x="8" y="8" width="108" height="34" rx="2" style="fill:var(--bat);opacity:.85"/>' + T(62, 30, 'LiFePO₄ 48 В', 13, '#fff') + T(62, 58, 'Батарей 100 Ач', 11);
+      break;
+    case 'dcbrk': case 'acbrk': {
+      s += T(36, 28, c.type === 'dcbrk' ? 'DC' : 'AC', 12) + '<rect x="24" y="36" width="24" height="26" rx="2" style="fill:var(--panel2);stroke:' + ink + '"/>' +
+        '<rect data-sw="' + c.id + '" x="27" y="' + (c.on ? 39 : 50) + '" width="18" height="10" rx="1" style="fill:' + (c.on ? '#1E7B4A' : '#B3261E') + ';cursor:pointer"/>' + T(36, 78, c.on ? 'I · АСААЛТТАЙ' : 'O · САЛГАСАН', 9, c.on ? '#1E7B4A' : '#B3261E');
+      break; }
+    case 'meter':
+      s += '<rect x="10" y="30" width="60" height="22" rx="2" style="fill:#0F2A1F"/>' + T(40, 46, '0012.4', 13, '#6BE39A') + T(40, 72, 'кВт·ц', 10);
+      break;
+    case 'inv': {
+      const inv = INVERTERS[C.inv];
+      s += T(160, 28, 'ИНВЕРТЕР', 13) + T(160, 42, inv.brand + ' ' + inv.name, 10, 'var(--ink2)') +
+        '<rect x="115" y="52" width="90" height="34" rx="2" style="fill:#0F2A1F"/>' + T(160, 74, C.sysType === 'hybrid' ? C.mode : '—', 16, '#6BE39A') +
+        '<circle cx="60" cy="70" r="5" style="fill:#3DDC84"/><circle cx="82" cy="70" r="5" style="fill:#F2B21F"/><circle cx="104" cy="70" r="5" style="fill:#7A8791"/>' +
+        T(60, 88, 'DC', 9, 'var(--ink2)') + T(82, 88, 'AC', 9, 'var(--ink2)') + T(104, 88, 'ERR', 9, 'var(--ink2)') +
+        '<rect x="220" y="56" width="78" height="26" rx="2" style="fill:var(--panel2);stroke:var(--line)"/>' + T(259, 73, inv.mppt + ' MPPT · ' + inv.pn + ' Вт', 9, 'var(--ink2)');
+      break; }
+    case 'grid':
+      s += '<path d="M50 14 L38 54 M50 14 L62 54 M42 34 L58 34 M45 24 L55 24 M30 24 L70 24" style="fill:none;stroke:' + ink + ';stroke-width:2"/>' + T(50, 62, '230 В', 10, 'var(--ink2)');
+      break;
+    default: { /* ачаалал */
+      const nm = BT[c.type].short;
+      if (c.type === 'pump') s += '<circle cx="50" cy="38" r="17" style="fill:#2E8B57;stroke:' + ink + ';stroke-width:1.5"/>' + T(50, 44, 'M', 16, '#fff');
+      else if (c.type === 'lights') s += '<circle cx="50" cy="36" r="13" style="fill:#FBEFA6;stroke:' + ink + ';stroke-width:1.5"/><path d="M44 36 L50 28 L56 36" style="fill:none;stroke:' + ink + '"/>';
+      else if (c.type === 'heater') s += '<path d="M28 38 L36 28 L44 48 L52 28 L60 48 L68 28 L72 38" style="fill:none;stroke:#C62828;stroke-width:2.5"/>';
+      else if (c.type === 'fridge') s += '<rect x="36" y="14" width="28" height="42" rx="2" style="fill:#EAF2F8;stroke:' + ink + ';stroke-width:1.5"/><line x1="36" y1="28" x2="64" y2="28" style="stroke:' + ink + '"/>';
+      else if (BT[c.type].generic) s += '<rect x="28" y="16" width="44" height="34" rx="4" style="fill:var(--panel2);stroke:' + ink + ';stroke-width:1.5"/>' + T(50, 38, BT[c.type].generic + ' Вт', 12);
+      else s += '<path d="M36 52 L40 26 L60 26 L64 52 Z" style="fill:#DDE4E9;stroke:' + ink + ';stroke-width:1.5"/><path d="M64 32 q10 4 0 14" style="fill:none;stroke:' + ink + ';stroke-width:1.5"/>';
+      s += T(50, 70, nm, 11);
+    }
+  }
+  return s;
+}
+function wirePath(a, b, idx) {
+  const da = a.t.y === 0 ? -1 : 1, db = b.t.y === 0 ? -1 : 1;
+  const ya = a.y + da * 16, yb = b.y + db * 16;
+  let mid = (ya + yb) / 2 + ((idx % 5) - 2) * 7;
+  if (da === db) mid = da > 0 ? Math.max(ya, yb) + 8 + (idx % 4) * 5 : Math.min(ya, yb) - 8 - (idx % 4) * 5;
+  const pts = [[a.x, a.y], [a.x, ya], [a.x, mid], [b.x, mid], [b.x, yb], [b.x, b.y]];
+  return 'M' + pts.map(p => p[0] + ' ' + p[1]).join(' L');
+}
+function renderBench() {
+  const svg = $('#bench'); if (!svg) return;
+  const map = benchTermMap(); const ev = evalBench(); BENCH.ev = ev;
+  let s = '<defs><pattern id="bdots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" style="fill:var(--line)"/></pattern></defs>' +
+    '<rect width="' + BW + '" height="' + BH + '" style="fill:var(--panel2)"/><rect width="' + BW + '" height="' + BH + '" fill="url(#bdots)"/>';
+  BENCH.comps.forEach(c => {
+    s += '<g data-c="' + c.id + '" transform="translate(' + c.x + ' ' + c.y + ')" style="cursor:move">' + compSVG(c) +
+      (BENCH.sel === c.id ? '<rect x="-4" y="-4" width="' + (BT[c.type].w + 8) + '" height="' + (BT[c.type].h + 8) + '" rx="5" style="fill:none;stroke:var(--grid);stroke-width:2.5" stroke-dasharray="6 4"/>' : '') + '</g>';
+  });
+  BENCH.wires.forEach((w, i) => {
+    const a = map[w.a], b = map[w.b]; if (!a || !b) return;
+    const bad = ev.badW.has(i), col = bad ? 'var(--bad)' : TCOL[a.t.t];
+    const d = wirePath(a, b, i);
+    s += '<path d="' + d + '" style="fill:none;stroke:' + col + ';stroke-width:' + (bad ? 3.5 : 3) + ';stroke-linejoin:round"' + (bad ? ' stroke-dasharray="7 4"' : '') + '/>' +
+      (ev.canApply && !bad ? '<path d="' + d + '" class="wlive"/>' : '') +
+      '<path data-w="' + i + '" d="' + d + '" style="fill:none;stroke:transparent;stroke-width:12;cursor:pointer"><title>Утсыг устгахын тулд дарна</title></path>';
+  });
+  if (BENCH.pending && BENCH.mouse && map[BENCH.pending]) {
+    const pm = map[BENCH.pending];
+    s += '<path d="M' + pm.x + ' ' + pm.y + ' L' + BENCH.mouse.x + ' ' + BENCH.mouse.y + '" style="fill:none;stroke:' + TCOL[pm.t.t] + ';stroke-width:2.5;opacity:.7" stroke-dasharray="6 5"/>';
+  }
+  Object.keys(map).forEach(k => {
+    const m = map[k], t = m.t, top = t.y === 0, pend = BENCH.pending === k;
+    const pt = BENCH.pending && map[BENCH.pending] ? map[BENCH.pending].t.t : null;
+    if (pt && pt === t.t && !pend) s += '<circle cx="' + m.x + '" cy="' + m.y + '" r="10" style="fill:none;stroke:#F2B21F;stroke-width:2;opacity:.9" pointer-events="none"/>';
+    if (BENCH.hl && BENCH.hl.includes(k)) s += '<circle class="hlring" cx="' + m.x + '" cy="' + m.y + '" r="12" pointer-events="none"/>';
+    s += '<circle data-t="' + k + '" cx="' + m.x + '" cy="' + m.y + '" r="' + (pend ? 8 : 6) + '" style="fill:' + TCOL[t.t] + ';stroke:' + (pend ? '#F2B21F' : 'var(--panel)') + ';stroke-width:' + (pend ? 3 : 1.5) + ';cursor:crosshair"/>' +
+      '<text x="' + m.x + '" y="' + (top ? m.y + 17 : m.y - 9) + '" text-anchor="middle" style="font:10px var(--font);fill:var(--ink);pointer-events:none">' + t.lab + '</text>';
+  });
+  svg.innerHTML = s;
+  renderBenchSide(ev);
+  if (benchHook) benchHook(ev);
+}
+function renderBenchSide(ev) {
+  renderReq(ev);
+  $('#benchMsgs').innerHTML = ev.msgs.map(m => '<div class="al ' + (m.l === 'err' ? 'fault' : m.l === 'warn' ? 'warn' : m.l === 'ok' ? 'ok' : 'info') + '">' + esc(m.t) + '</div>').join('');
+  $('#btnBenchApply').disabled = !ev.canApply;
+  const cnt = {}; BENCH.comps.forEach(c => cnt[c.type] = (cnt[c.type] || 0) + 1);
+  const wc = BENCH.wires.length;
+  $('#benchBom').innerHTML = '<tr><th>Тоног төхөөрөмж</th><th>Тоо</th><th>Үүрэг</th></tr>' +
+    Object.keys(cnt).map(k => '<tr><td>' + esc(BT[k].name) + '</td><td>' + cnt[k] + '</td><td>' + esc(BT[k].role) + '</td></tr>').join('') +
+    '<tr><td>Холболтын утас</td><td>' + wc + '</td><td>Улаан «+», хар «−», бор L, цэнхэр N</td></tr>';
+}
+
+/* ---------- Үйлдлүүд ---------- */
+function svgPt(e) {
+  const svg = $('#bench'), pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+  const m = svg.getScreenCTM(); return m ? pt.matrixTransform(m.inverse()) : { x:0, y:0 };
+}
+function terminalClick(id) {
+  if (!BENCH.pending) { BENCH.pending = id; renderBench(); return; }
+  if (BENCH.pending === id) { BENCH.pending = null; renderBench(); return; }
+  const a = BENCH.pending, b = id;
+  if (!BENCH.wires.some(w => (w.a === a && w.b === b) || (w.a === b && w.b === a))) { benchPush(); BENCH.wires.push({ a, b }); }
+  BENCH.pending = null; BENCH.hl = null; renderBench();
+}
+function addFromPalette(type) {
+  if (BT[type].max && BENCH.comps.filter(c => c.type === type).length >= BT[type].max) { $('#benchHint').textContent = 'Нэг самбарт зөвхөн нэг инвертер байрлуулна.'; return; }
+  benchPush(); BENCH.hl = null;
+  const n = BENCH.comps.length;
+  const c = benchAdd(type, 30 + (n % 6) * 40, 30 + (n % 5) * 30);
+  BENCH.sel = c.id; $('#benchHint').textContent = BT[type].name + ' нэмлээ. Чирж зөөгөөд, терминал дээр дарж утас холбоно.'; renderBench();
+}
+const FAULT_N = 11;
+function buildPresetState(kind, n, opts) {
+  opts = opts || {};
+  const st = { comps:[], wires:[], nid:1, text:'' };
+  const OX = 200, OY = 40;
+  const add = (type, x, y) => { const c = { id:'c' + (st.nid++), type, x:x + OX, y:y + OY, on:true }; st.comps.push(c); return c; };
+  const W = (a, at, b2, bt) => st.wires.push({ a:a.id + '.' + at, b:b2.id + '.' + bt });
+  const drop = (a, at, b2, bt) => { const x = a.id + '.' + at, y = b2.id + '.' + bt; st.wires = st.wires.filter(w => !((w.a === x && w.b === y) || (w.a === y && w.b === x))); };
+  const del = c => { st.comps = st.comps.filter(x => x !== c); st.wires = st.wires.filter(w => !w.a.startsWith(c.id + '.') && !w.b.startsWith(c.id + '.')); };
+  const inv = add('inv', 300, 330);
+  const N = opts.series || 2, M = opts.strings || 2;
+  const dcp = add('dcbrk', 340, 190);
+  const strs = [];
+  for (let s = 0; s < M; s++) {
+    const chain = [];
+    for (let i = 0; i < N; i++) chain.push(add('pv', 150 + s * (N * 76 + 24) + i * 76, 20));
+    strs.push(chain);
+    for (let i = 0; i < N - 1; i++) W(chain[i], 'm', chain[i + 1], 'p');
+    W(chain[0], 'p', dcp, 'inP'); W(chain[N - 1], 'm', dcp, 'inM');
+  }
+  W(dcp, 'outP', inv, 'pvP'); W(dcp, 'outM', inv, 'pvM');
+  let bat = null, dcb = null;
+  if (kind !== 'ongrid') {
+    bat = add('bat', 640, 40); dcb = add('dcbrk', 650, 190);
+    W(bat, 'p', dcb, 'inP'); W(bat, 'm', dcb, 'inM'); W(dcb, 'outP', inv, 'batP'); W(dcb, 'outM', inv, 'batM');
+  }
+  const ac1 = add('acbrk', 320, 520), grid = add('grid', 300, 640);
+  W(inv, 'gL', ac1, 'inL'); W(inv, 'gN', ac1, 'inN'); W(ac1, 'outL', grid, 'L'); W(ac1, 'outN', grid, 'N');
+  const ac2 = add('acbrk', 490, 520);
+  W(inv, 'lL', ac2, 'inL'); W(inv, 'lN', ac2, 'inN');
+  (opts.loads || ['lights', 'fridge', 'kettle']).forEach((t, i) => { const l = add(t, 440 + i * 110, 660); W(ac2, 'outL', l, 'L'); W(ac2, 'outN', l, 'N'); });
+  st.text = kind === 'ongrid' ? 'Сүлжээтэй зэрэгцээ схем: батарей байхгүй.' : 'Зөв хосолмол схем (2 string × 2 хавтан). Автоматыг унтрааж, утас устгаж үр дүнг ажигла.';
+  if (kind === 'faulty') {
+    n = Math.max(1, Math.min(FAULT_N, n || 1));
+    const s0 = strs[0], s1 = strs[1];
+    switch (n) {
+      case 1: drop(dcp, 'outP', inv, 'pvP'); drop(dcp, 'outM', inv, 'pvM'); W(dcp, 'outP', inv, 'pvM'); W(dcp, 'outM', inv, 'pvP'); break;
+      case 2: drop(dcb, 'outP', inv, 'batP'); drop(dcb, 'outM', inv, 'batM'); W(dcb, 'outP', inv, 'batM'); W(dcb, 'outM', inv, 'batP'); break;
+      case 3: drop(dcp, 'outP', inv, 'pvP'); drop(dcp, 'outM', inv, 'pvM'); drop(dcb, 'outP', inv, 'batP'); drop(dcb, 'outM', inv, 'batM');
+        W(dcp, 'outP', inv, 'batP'); W(dcp, 'outM', inv, 'batM'); W(dcb, 'outP', inv, 'pvP'); W(dcb, 'outM', inv, 'pvM'); break;
+      case 4: del(dcb); W(bat, 'p', inv, 'batP'); W(bat, 'm', inv, 'batM'); break;
+      case 5: del(dcp); strs.forEach(ch => { W(ch[0], 'p', inv, 'pvP'); W(ch[ch.length - 1], 'm', inv, 'pvM'); }); break;
+      case 6: drop(inv, 'gL', ac1, 'inL'); drop(inv, 'gN', ac1, 'inN'); W(inv, 'gL', ac1, 'inN'); W(inv, 'gN', ac1, 'inL'); break;
+      case 7: drop(inv, 'lL', ac2, 'inL'); drop(inv, 'lN', ac2, 'inN'); W(inv, 'gL', ac2, 'inL'); W(inv, 'gN', ac2, 'inN'); break;
+      case 8: W(dcp, 'outP', dcp, 'outM'); break;
+      case 9: W(ac2, 'outL', ac2, 'outN'); break;
+      case 10: drop(bat, 'm', dcb, 'inM'); break;
+      case 11: dcp.on = false; del(ac1); W(inv, 'gL', grid, 'L'); W(inv, 'gN', grid, 'N'); break;
+      case 12: break;
+    }
+    // 12 дахь нэмэлт ойлголт: string хоорондын хавтангийн хэмжээ зөрүү
+    st.text = 'Алдаатай схем №' + n + ': энэ схемд алдаа бий. Шалгалтын мэдэгдэл, «Зөвлөмж»-өөр олж, утас устгаж, дахин холбож засна уу.';
+  }
+  return st;
+}
+function loadPreset(kind, n, opts) {
+  benchPush();
+  const st = buildPresetState(kind, n, opts);
+  BENCH.comps = st.comps; BENCH.wires = st.wires; BENCH.nid = st.nid; BENCH.sel = null; BENCH.pending = null; BENCH.hl = null;
+  $('#benchHint').textContent = st.text;
+  renderBench();
+}
+
+/* ---------- Симуляторт зориулсан схемийн загвар ---------- */
+function evalState(st) {
+  const sc = BENCH.comps, sw = BENCH.wires;
+  BENCH.comps = st.comps; BENCH.wires = st.wires;
+  try { return evalBench(); } finally { BENCH.comps = sc; BENCH.wires = sw; }
+}
+function wdBuild(st) {
+  const sc = BENCH.comps, sw = BENCH.wires;
+  BENCH.comps = st.comps; BENCH.wires = st.wires;
+  try {
+    const map = benchTermMap(), cur = benchUF(map, 'cur'), ev = evalBench();
+    const inv = st.comps.find(c => c.type === 'inv');
+    const netRole = {};
+    if (inv) { const pr = { pvP:'pv', pvM:'pv', batP:'bat', batM:'bat', gL:'grid', gN:'grid', lL:'load', lN:'load' }; Object.keys(pr).forEach(p => { netRole[cur.find(inv.id + '.' + p)] = pr[p]; }); }
+    const compRole = c => c.type === 'pv' ? 'pv' : c.type === 'bat' ? 'bat' : c.type === 'grid' ? 'grid' : BT[c.type].app ? 'load' : null;
+    /* BFS зайг инвертерээс */
+    const dist = {}; if (inv) { dist[inv.id] = 0; const q = [inv.id]; while (q.length) { const x = q.shift(); st.wires.forEach(w => { const a = w.a.split('.')[0], b = w.b.split('.')[0]; [[a, b], [b, a]].forEach(([u, v]) => { if (u === x && dist[v] === undefined) { dist[v] = dist[x] + 1; q.push(v); } }); }); } }
+    const wires = st.wires.map((w, i) => {
+      const A = map[w.a], B = map[w.b]; if (!A || !B) return null;
+      const role = netRole[cur.find(w.a)] || netRole[cur.find(w.b)] || compRole(A.c) || compRole(B.c) || null;
+      const neg = A.t.t === 'm' || A.t.t === 'N';
+      return { i, A, B, role, neg, dA: dist[A.c.id] ?? 99, dB: dist[B.c.id] ?? 99, bad: false };
+    }).filter(Boolean);
+    let x0 = 1e9, y0 = 1e9, x1 = 0, y1 = 0;
+    st.comps.forEach(c => { x0 = Math.min(x0, c.x); y0 = Math.min(y0, c.y); x1 = Math.max(x1, c.x + BT[c.type].w); y1 = Math.max(y1, c.y + BT[c.type].h); });
+    return { map, wires, ev, inv, bounds:[x0 - 40, y0 - 40, x1 + 40, y1 + 50] };
+  } finally { BENCH.comps = sc; BENCH.wires = sw; }
+}
+function benchDerive(ev, comps) {
+  comps = comps || BENCH.comps;
+  const batN = comps.filter(c => c.type === 'bat').length;
+  return { sysType: ev.has.bat ? (ev.has.grid ? 'hybrid' : 'offgrid') : 'ongrid', series: ev.has.pvSeries || 0, strings: ev.has.pvStrings || 0,
+           bat: ev.has.bat, ah: Math.min(600, 100 * Math.max(1, batN)), loads: ev.has.loads.slice() };
+}
+function applyBench() {
+  const ev = BENCH.ev; if (!ev || !ev.canApply) return;
+  const d = benchDerive(ev);
+  C.sysType = d.sysType; C.series = d.series; C.strings = d.strings; if (d.bat) C.ah = d.ah;
+  APPLIANCES.forEach(a => C.apps[a.id].on = d.loads.includes(a.id));
+  C.sched = true; C.extra = 0; S.latch = null;
+  refreshControls(); restart(6); setPlaying(true);
+  CFGOWNER = 'sim'; SIMCFG = JSON.stringify(C);
+  go('sim');
+}
+/* ---------- Шаардлага ба зөвлөмж ---------- */
+function wireReq(req) {
+  const ev = BENCH.ev || evalBench(), has = ev.has, comps = BENCH.comps, items = [];
+  const hasT = t => comps.some(c => c.type === t);
+  items.push(['Инвертер самбарт байрласан', hasT('inv')]);
+  items.push(['Схемд алдаа алга (туйл, богино залгаа, оролт)', comps.length > 0 && ev.errors === 0]);
+  items.push(['Нарны хавтангууд string болгон цуваа холбогдож инвертерт орсон (хамгийн багадаа ' + (req.minPV || 2) + ' хавтан)', !!has.pv && has.pvC >= (req.minPV || 2)]);
+  items.push(['String бүрд хамгийн багадаа 2 хавтан цуваа (Vmp ≥ MPPT-ийн доод хүчдэл)', !!has.pv && has.pvSeries * PANEL.vmp >= 80]);
+  if (req.series) items.push(['String бүрд яг ' + req.series + ' хавтан цуваа холбосон', !!has.pv && has.pvSeries === req.series]);
+  if (req.parallel) items.push(['Хамгийн багадаа ' + req.parallel + ' string параллель холбосон', !!has.pv && has.pvStrings >= req.parallel]);
+  if (req.kind === 'hybrid') { items.push(['Батарей холбогдсон', has.bat]); items.push(['Сүлжээ холбогдсон', has.grid]); }
+  if (req.kind === 'offgrid') { items.push(['Батарей холбогдсон', has.bat]); items.push(['Сүлжээний блок байхгүй (тусдаа систем)', !hasT('grid')]); }
+  if (req.kind === 'ongrid') { items.push(['Сүлжээ холбогдсон', has.grid]); items.push(['Батарей байхгүй (сүлжээтэй зэрэгцээ)', !hasT('bat')]); }
+  (req.loads || []).forEach(a => { const t = Object.keys(BT).find(k => BT[k].app === a); items.push(['Ачаалал: ' + BT[t].name, has.loads.includes(a)]); });
+  items.push(['Хамгаалалтын автомат (DC болон AC) дундуур холбосон', hasT('dcbrk') && hasT('acbrk') && ev.errors === 0 && !!has.pv && !ev.unprot]);
+  return { items, ok: items.every(i => i[1]) };
+}
+function benchHint(req) {
+  req = req || { kind:'hybrid', loads:[] };
+  const comps = BENCH.comps, inv = comps.find(c => c.type === 'inv');
+  if (!inv) return { t:'Зөвлөмж: эхлээд «Хосолмол инвертер»-ийг самбарт нэмээрэй. Бүх зүйл инвертерт холбогдоно.' };
+  const need = ['pv'];
+  if (req.kind !== 'ongrid') need.push('bat');
+  if (req.kind !== 'offgrid') need.push('grid');
+  const dcCnt = comps.filter(c => c.type === 'dcbrk').length, acCnt = comps.filter(c => c.type === 'acbrk').length;
+  const loadsT = (req.loads || []).map(a => Object.keys(BT).find(k => BT[k].app === a));
+  const ports = { bat:[['p', 'batP'], ['m', 'batM']], grid:[['L', 'gL'], ['N', 'gN']] };
+  const dcNeeded = (need.includes('pv') ? 1 : 0) + (need.includes('bat') ? 1 : 0), acNeeded = (need.includes('grid') ? 1 : 0) + (loadsT.length ? 1 : 0);
+  for (const t of need) {
+    if (!comps.some(c => c.type === t)) return { t:'Зөвлөмж: самбарт «' + BT[t].name + '» нэмнэ.' + (t === 'pv' ? ' Хамгийн багадаа ' + (req.minPV || 2) + ' хавтан хэрэгтэй.' : '') };
+  }
+  if (comps.filter(c => c.type === 'pv').length < (req.minPV || 2)) return { t:'Зөвлөмж: нарны хавтангийн тоо хүрэлцэхгүй байна. Хамгийн багадаа ' + (req.minPV || 2) + ' хавтан нэмнэ.' };
+  for (const t of loadsT) if (!comps.some(c => c.type === t)) return { t:'Зөвлөмж: самбарт «' + BT[t].name + '» ачааллыг нэмнэ.' };
+  if (dcCnt < dcNeeded) return { t:'Зөвлөмж: PV болон батарей бүрийн өмнө DC автомат хэрэгтэй. Одоо ' + dcCnt + ' / ' + dcNeeded + ' байна, «DC автомат» нэмнэ.' };
+  if (acCnt < acNeeded) return { t:'Зөвлөмж: сүлжээ болон ачааллын тал бүрт AC автомат хэрэгтэй. Одоо ' + acCnt + ' / ' + acNeeded + ' байна, «AC автомат» нэмнэ.' };
+  const map = benchTermMap(), cur = benchUF(map, 'cur'), closed = benchUF(map, 'closed'), open = benchUF(map, 'open');
+  const stat = (c, tid, port) => cur.same(c.id + '.' + tid, inv.id + '.' + port);
+  const check = (c, pr, label, brk) => {
+    for (const [tid, port] of pr) {
+      if (!stat(c, tid, port)) {
+        const tl = BT[c.type].terms.find(x => x.id === tid).lab;
+        return { t:'Зөвлөмж: «' + label + '» ' + tl + ' терминалаас ' + brk + ' автоматын дундуур инвертерийн «' + PORTN[port] + '» оролт хүртэл утас татна.', hl:[c.id + '.' + tid, inv.id + '.' + port] };
+      }
+    }
+    if (open.same(c.id + '.' + pr[0][0], inv.id + '.' + pr[0][1]))
+      return { t:'Зөвлөмж: «' + label + '» инвертертэй автоматгүй шууд холбогдсон байна. Утсыг устгаад ' + brk + ' автоматын дундуур дахин холбоно.', hl:[c.id + '.' + pr[0][0], inv.id + '.' + pr[0][1]] };
+    return null;
+  };
+  {
+    const st = pvStrings(cur, inv);
+    if (st.rev.length) return { t:'Зөвлөмж: хавтангийн туйл урвуу байна. String-ийн эхний «+»-ыг PV+ руу, сүүлийн «−»-ыг PV− руу холбоно.', hl:[st.rev[0].id + '.p', st.rev[0].id + '.m'] };
+    if (!st.strings.length || st.orphans.length) {
+      const o = st.orphans[0] || st.panels[0];
+      return { t:'Зөвлөмж: нарны хавтангуудыг цуваа холбоно. Нэг хавтангийн «−»-ыг дараагийнхийн «+»-той холбоно. String-ийн эхний «+»-ыг DC автоматаар дамжуулж PV+ руу, сүүлийн «−»-ыг PV− руу холбоно. Параллель string-үүд DC автомат дээр нийлнэ.', hl:[o.id + '.p', o.id + '.m'] };
+    }
+    if (st.strings.some(x => x !== st.strings[0])) return { t:'Зөвлөмж: параллель string-үүдийн хавтангийн тоо тэнцүү байх ёстой.' };
+    if (req.series && st.strings[0] !== req.series) return { t:'Зөвлөмж: String бүрд яг ' + req.series + ' хавтан цуваа холбоно уу. Одоо ' + st.strings[0] + '.' };
+    if (req.parallel && st.strings.length < req.parallel) return { t:'Зөвлөмж: дахин нэг string нэмж DC автомат дээр параллель холбоно (' + st.strings.length + ' / ' + req.parallel + ').' };
+    if (st.strings[0] * PANEL.vmp < 80) return { t:'Зөвлөмж: String-ийн хүчдэл (' + (st.strings[0] * PANEL.vmp).toFixed(0) + ' В) бага. String бүрд 2-оос цөөнгүй хавтан цуваа холбоно.' };
+    const pvOpenDirect = st.panels.find(c => open.same(c.id + '.p', inv.id + '.pvP') && closed.same(c.id + '.p', inv.id + '.pvP'));
+    if (pvOpenDirect) return { t:'Зөвлөмж: нарны массив инвертертэй автоматгүй шууд холбогдсон. Утсыг устгаад DC автоматын дундуур холбоно.', hl:[pvOpenDirect.id + '.p', inv.id + '.pvP'] };
+  }
+  for (const t of need.filter(x => x !== 'pv')) for (const c of comps.filter(x => x.type === t)) {
+    const r = check(c, ports[t], BT[t].name, t === 'grid' ? 'AC' : 'DC'); if (r) return r;
+  }
+  for (const t of loadsT) for (const c of comps.filter(x => x.type === t)) {
+    const r = check(c, [['L', 'lL'], ['N', 'lN']], BT[t].name, 'AC'); if (r) return r;
+  }
+  return { t:'Бүх шаардлагатай холболт хийгдсэн байна. Дээрх шаардлагын жагсаалтыг шалгана уу.' };
+}
+function renderReq(ev) {
+  const box = $('#benchReqBox'); if (!box) return;
+  if (!BENCH.req) { box.hidden = true; return; }
+  box.hidden = false;
+  const r = wireReq(BENCH.req);
+  $('#benchReq').innerHTML = r.items.map(i => '<li class="' + (i[1] ? 'ok' : '') + '">' + esc(i[0]) + '</li>').join('');
+  BENCH.reqOK = r.ok;
+}
+function initBench() {
+  const pal = $('#benchPal');
+  pal.innerHTML = PALETTE.map(g => '<div class="pg">' + esc(g[0]) + '</div>' + g[1].map(t => '<button class="pb" data-add="' + t + '" title="' + esc(BT[t].role) + '"><b>' + esc(BT[t].name) + '</b><span>' + esc(BT[t].role) + '</span></button>').join('')).join('');
+  $$('#benchPal .pb').forEach(b => b.addEventListener('click', () => addFromPalette(b.dataset.add)));
+  const sel = $('#benchInv');
+  sel.innerHTML = INVERTERS.map((v, i) => '<option value="' + i + '">' + esc(v.brand + ' ' + v.name) + '</option>').join(''); sel.value = C.inv;
+  sel.addEventListener('change', () => { C.inv = +sel.value; refreshControls(); renderBench(); refreshNow(); });
+  const svg = $('#bench');
+  svg.addEventListener('pointerdown', e => {
+    const t = e.target.closest('[data-t]'); if (t) { terminalClick(t.dataset.t); e.preventDefault(); return; }
+    const w = e.target.closest('[data-w]'); if (w) { benchPush(); BENCH.wires.splice(+w.dataset.w, 1); BENCH.hl = null; renderBench(); return; }
+    const sw = e.target.closest('[data-sw]'); if (sw) { const c = BENCH.comps.find(x => x.id === sw.dataset.sw); c.on = !c.on; renderBench(); return; }
+    const ce = e.target.closest('[data-c]');
+    if (ce) {
+      const c = BENCH.comps.find(x => x.id === ce.dataset.c), p = svgPt(e);
+      BENCH.sel = c.id; BENCH.drag = { c, dx:p.x - c.x, dy:p.y - c.y, snap:benchSnap(), moved:false }; svg.setPointerCapture(e.pointerId); renderBench(); e.preventDefault();
+    } else { BENCH.sel = null; BENCH.pending = null; renderBench(); }
+  });
+  svg.addEventListener('pointermove', e => {
+    const d = BENCH.drag;
+    if (!d) { if (BENCH.pending) { BENCH.mouse = svgPt(e); renderBench(); } return; }
+    const p = svgPt(e); if (!d.moved) { d.moved = true; benchPush(d.snap); }
+    d.c.x = Math.max(0, Math.min(BW - BT[d.c.type].w, Math.round((p.x - d.dx) / 10) * 10));
+    d.c.y = Math.max(0, Math.min(BH - BT[d.c.type].h, Math.round((p.y - d.dy) / 10) * 10)); renderBench();
+  });
+  const end = () => { BENCH.drag = null; };
+  svg.addEventListener('pointerup', end); svg.addEventListener('pointercancel', end);
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && $('#bench') && $('#bench').offsetParent) { e.preventDefault(); benchUndo(); return; } if ((e.key === 'Delete' || e.key === 'Backspace') && BENCH.sel && !/INPUT|SELECT|TEXTAREA/.test((e.target.tagName || ''))) benchDeleteSel(); });
+  $('#btnBenchDel').addEventListener('click', benchDeleteSel);
+  $('#btnBenchClear').addEventListener('click', () => { benchPush(); BENCH.comps = []; BENCH.wires = []; BENCH.sel = null; BENCH.pending = null; $('#benchHint').textContent = 'Самбар цэвэрлэгдлээ.'; renderBench(); });
+  $('#btnBenchApply').addEventListener('click', applyBench);
+  $$('[data-preset]').forEach(b => b.addEventListener('click', () => { if (b.dataset.preset === 'faulty') loadPreset('faulty', +$('#faultSel').value); else loadPreset(b.dataset.preset); }));
+  $('#faultSel').innerHTML = Array.from({ length:FAULT_N }, (_, i) => '<option value="' + (i + 1) + '">Алдаатай схем ' + (i + 1) + '</option>').join('');
+  $('#btnBenchUndo').addEventListener('click', benchUndo);
+  $('#btnBenchHint').addEventListener('click', () => { const h = benchHint(BENCH.req); BENCH.hl = h.hl || null; $('#benchHint').textContent = h.t; renderBench(); });
+}
+function benchDeleteSel() {
+  if (!BENCH.sel) return;
+  const id = BENCH.sel;
+  benchPush();
+  BENCH.comps = BENCH.comps.filter(c => c.id !== id);
+  BENCH.wires = BENCH.wires.filter(w => !w.a.startsWith(id + '.') && !w.b.startsWith(id + '.'));
+  BENCH.sel = null; renderBench();
+}
+
+/* ===================== UI ===================== */
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const C = defaultCfg(); C._vn = C.vn;
+let S = newState(C);
+let playing = false, speed = 30, acc = 0, dayNo = 1;
+const NH = 240;
+let hist = null;
+function resetHist() {
+  hist = { pv:new Array(NH).fill(null), load:new Array(NH).fill(null), grid:new Array(NH).fill(null), bat:new Array(NH).fill(null),
+           soc:new Array(NH).fill(null), v:new Array(NH).fill(null), i:new Array(NH).fill(null) };
+}
+resetHist();
+
+const fmtP = w => Math.abs(w) >= 1000 ? (w / 1000).toFixed(2) + ' кВт' : Math.round(w) + ' Вт';
+const fmtT = h => { h = ((h % 24) + 24) % 24; const hh = Math.floor(h), mm = Math.floor((h - hh) * 60); return String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0'); };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+
+/* ---------- Удирдлагын тодорхойлолт ---------- */
+const VKEYS = ['vabs', 'vcut', 'vswitch', 'vreturn', 'vrestart'];
+const MODES = [
+  ['SBU', 'Нар → Батарей → Сүлжээ (SBU)'], ['SUB', 'Нар → Сүлжээ → Батарей (SUB)'], ['USB', 'Сүлжээ → Нар → Батарей (USB)'],
+  ['SELF', 'Өөрийн хэрэглээ (Self-consumption)'], ['PEAK', 'Оргил ачаалал бууруулах (Peak-shaving)']
+];
+const MODE_INFO = {
+  SBU:  'Нар → Батарей → Сүлжээ. Хамгийн хэмнэлттэй горим: эхлээд нарны эрчим хүч, хүрэлцэхгүй бол батарей, батарейн хүчдэл «сүлжээ рүү шилжих хүчдэл»-ээс буурахад л сүлжээ рүү шилжинэ.',
+  SUB:  'Нар → Сүлжээ → Батарей. Нарны эрчим хүчээр ажиллаж, дутсан хэсгийг сүлжээнээс нөхнө. Батарейг зөвхөн сүлжээ тасарсан үед ашиглана.',
+  USB:  'Сүлжээ → Нар → Батарей. Сүлжээ гол эх үүсвэр, нар батарейг цэнэглэнэ. Тог тасралтгүй байх нь чухал, цахилгаан тасрах эрсдэл ихтэй газарт тохиромжтой.',
+  SELF: 'Self-consumption: өөрийн ачааллаа аль болох нар болон батарейгаар хангана. Нөөц цэнэгээс доош буулгахгүй, илүүдлийг сүлжээнд өгнө.',
+  PEAK: 'Peak-shaving: оргил цагт сүлжээнээс авах чадлыг тогтоосон хэмжээнд барьж, дутуу хэсгийг батарейгаар нөхнө. Шөнө батарейг урьдчилж цэнэглэнэ.'
+};
+const SYS_INFO = {
+  ongrid:  'Сүлжээтэй зэрэгцээ систем: батарей шаардлагагүй, илүүдэл эрчим хүчийг сүлжээнд буцааж өгнө. Сүлжээ тасарвал аюулгүй байдлын үүднээс систем ажиллахгүй.',
+  offgrid: 'Сүлжээнээс тусдаа систем: нарны хавтан → батарей → ачаалал. Батарей зайлшгүй хэрэгтэй, алслагдсан газарт тохиромжтой.',
+  hybrid:  'Хосолмол систем: эрчим хүчийг уян хатан удирдана, илүүдлийг батарейд хадгална, сүлжээ тасарсан үед нөөц болно.'
+};
+const TABS = [
+  { id:'tSys', title:'Систем ба инвертер', items:[
+    { k:'sysType', type:'select', label:'Системийн төрөл', opts:[['hybrid','Хосолмол'], ['ongrid','Сүлжээтэй зэрэгцээ (батарейгүй)'], ['offgrid','Сүлжээнээс тусдаа']] },
+    { k:'mode', type:'select', label:'Гаралтын тэжээлийн дараалал', opts:MODES },
+    { type:'html', id:'modeInfo', cls:'modeinfo' },
+    { k:'inv', type:'select', num:true, label:'Инвертерийн загвар', opts:INVERTERS.map((v, i) => [i, v.brand + ' ' + v.name]) },
+    { type:'html', id:'invInfo', cls:'hint' },
+    { type:'title', text:'Байрлал ба хөргөлт' },
+    { k:'indoor', type:'check', label:'Инвертер, батарей дотор (халаалттай) байрлана' },
+    { k:'fanOK', type:'check', label:'Сэнс ажиллаж, агааржуулалт хэвийн' },
+    { k:'autoReset', type:'check', label:'Хэт ачааллын дараа 2 минутын дараа автоматаар дахин асах' }
+  ]},
+  { id:'tPv', title:'Нар ба орчин', items:[
+    { k:'season', type:'select', label:'Улирал', opts:Object.entries(SEASONS).map(([k, v]) => [k, v.label + ' (' + fmtT(v.sr) + '–' + fmtT(v.ss) + ')']) },
+    { k:'tamb', type:'range', label:'Орчны температур', min:-40, max:45, step:1, unit:'°C' },
+    { k:'cloud', type:'range', label:'Үүлэрхэг байдал', min:0, max:100, step:5, unit:'%' },
+    { type:'title', text:'Нарны хавтангийн массив' },
+    { k:'series', type:'range', label:'Цуваа холбосон хавтангийн тоо (string бүрд)', min:1, max:14, step:1, unit:'ш' },
+    { k:'strings', type:'range', label:'Параллель string-ийн тоо', min:0, max:6, step:1, unit:'ш' },
+    { k:'vpvmax', type:'range', label:'Инвертерийн PV оролтын дээд хүчдэл', min:60, max:600, step:5, unit:'В' },
+    { k:'vpvmin', type:'range', label:'MPPT-ийн доод (эхлэх) хүчдэл', min:30, max:200, step:5, unit:'В' },
+    { k:'shading', type:'range', label:'Сүүдэр (хавтангийн хоёр дахь бүлэгт)', min:0, max:100, step:5, unit:'%' },
+    { type:'html', id:'pvHint', cls:'hint' }
+  ]},
+  { id:'tBat', title:'Батарей', items:[
+    { k:'vn', type:'select', num:true, label:'Батарейн системийн хүчдэл', opts:[[24, '24 В'], [48, '48 В']] },
+    { k:'chem', type:'select', label:'Батарейн төрөл', opts:[['lfp', 'LiFePO₄ (LFP)'], ['la', 'Хүчлийн (lead-acid)']] },
+    { k:'ah', type:'range', label:'Багтаамж', min:50, max:600, step:10, unit:'Ач' },
+    { k:'soc0', type:'range', label:'Батарейн цэнэг (SOC) — шууд тохируулна', min:0, max:100, step:1, unit:'%' },
+    { type:'title', text:'Хүчдэлийн тохиргоо' },
+    { k:'vabs', type:'range', label:'Цэнэглэх хүчдэл (absorption)', min:52, max:60, step:0.1, unit:'В', scale:true },
+    { k:'maxChgA', type:'range', label:'Хамгийн их цэнэглэх гүйдэл', min:10, max:150, step:5, unit:'А' },
+    { k:'vcut', type:'range', label:'Cut-off хүчдэл (ачаалалтай үед)', min:40, max:50, step:0.1, unit:'В', scale:true },
+    { k:'vswitch', type:'range', label:'Сүлжээ рүү шилжих хүчдэл (SBU)', min:44, max:54, step:0.1, unit:'В', scale:true },
+    { k:'vreturn', type:'range', label:'Батарей руу буцах хүчдэл (SBU)', min:48, max:58, step:0.1, unit:'В', scale:true },
+    { k:'vrestart', type:'range', label:'Low voltage алдаанаас сэргэх хүчдэл', min:44, max:54, step:0.1, unit:'В', scale:true },
+    { type:'title', text:'Бусад' },
+    { k:'reserve', type:'range', label:'Нөөц цэнэг (Self, Peak горимд)', min:0, max:50, step:1, unit:'%' },
+    { k:'gridCharge', type:'check', label:'Сүлжээнээс батарей цэнэглэхийг зөвшөөрөх' },
+    { k:'export', type:'check', label:'Илүүдэл чадлыг сүлжээнд өгөх' }
+  ]},
+  { id:'tLoad', title:'Ачаалал ба сүлжээ', items:[
+    { k:'sched', type:'check', label:'Хэрэгслүүд өдрийн хуваарийн дагуу асна (унтраавал сонгосон нь тасралтгүй ажиллана)' },
+    { type:'apps' },
+    { type:'html', id:'loadSum', cls:'hint' },
+    { k:'extra', type:'range', label:'Нэмэлт тогтмол ачаалал', min:0, max:4000, step:50, unit:'Вт' },
+    { type:'title', text:'Сүлжээ' },
+    { k:'gridMode', type:'select', label:'Сүлжээний төлөв', opts:[['ok', 'Хэвийн'], ['out', 'Тасарсан'], ['sched', 'Хуваарьт тасралт']] },
+    { k:'outFrom', type:'range', label:'Тасралт эхлэх цаг', min:0, max:24, step:0.5, unit:'ц' },
+    { k:'outTo', type:'range', label:'Тасралт дуусах цаг', min:0, max:24, step:0.5, unit:'ц' },
+    { k:'gridV', type:'range', label:'Сүлжээний хүчдэл', min:160, max:280, step:1, unit:'В' },
+    { k:'gridF', type:'range', label:'Сүлжээний давтамж', min:48, max:52, step:0.05, unit:'Гц' },
+    { type:'title', text:'Peak-shaving горимын тохиргоо' },
+    { k:'peakThr', type:'range', label:'Оргил цагт сүлжээнээс авах дээд чадал', min:0, max:4000, step:100, unit:'Вт' },
+    { k:'peakFrom', type:'range', label:'Оргил цаг эхлэх', min:0, max:24, step:1, unit:'ц' },
+    { k:'peakTo', type:'range', label:'Оргил цаг дуусах', min:0, max:24, step:1, unit:'ц' },
+    { k:'preSoc', type:'range', label:'Шөнийн урьдчилсан цэнэгийн зорилт (23:00–06:00)', min:20, max:100, step:5, unit:'%' }
+  ]}
+];
+
+/* ---------- Удирдлага байгуулах ---------- */
+const ctlEls = {};
+function fmtVal(it, v) {
+  const d = it.step < 1 ? (it.step < 0.1 ? 2 : 1) : 0;
+  return (+v).toFixed(d) + ' ' + (it.unit || '');
+}
+function buildControls() {
+  const tabs = $('#ctlTabs'), panes = $('#ctlPanes');
+  TABS.forEach((t, ti) => {
+    const b = document.createElement('button');
+    b.textContent = t.title; b.setAttribute('role', 'tab'); b.dataset.t = t.id;
+    b.setAttribute('aria-selected', ti === 0 ? 'true' : 'false');
+    b.addEventListener('click', () => {
+      $$('#ctlTabs button').forEach(x => x.setAttribute('aria-selected', x === b ? 'true' : 'false'));
+      $$('.tabpane').forEach(p => p.classList.toggle('on', p.id === t.id));
+    });
+    tabs.appendChild(b);
+    const pane = document.createElement('div');
+    pane.className = 'tabpane fgrid' + (ti === 0 ? ' on' : ''); pane.id = t.id; pane.setAttribute('role', 'tabpanel');
+    t.items.forEach(it => {
+      if (it.type === 'title') { const d = document.createElement('div'); d.className = 'fs-title'; d.textContent = it.text; pane.appendChild(d); return; }
+      if (it.type === 'html') { const d = document.createElement('div'); d.id = it.id; d.className = it.cls || ''; d.style.gridColumn = '1/-1'; pane.appendChild(d); return; }
+      if (it.type === 'apps') { pane.appendChild(buildApps()); return; }
+      const f = document.createElement('div'); f.className = 'f' + (it.type === 'check' ? ' chk' : '');
+      const id = 'c_' + it.k;
+      if (it.type === 'check') {
+        f.innerHTML = '<input type="checkbox" id="' + id + '"><label for="' + id + '">' + esc(it.label) + '</label>';
+        const inp = f.querySelector('input');
+        inp.addEventListener('change', () => { C[it.k] = inp.checked; onCfg(it.k); });
+        ctlEls[it.k] = { it, inp };
+      } else if (it.type === 'select') {
+        f.innerHTML = '<label for="' + id + '">' + esc(it.label) + '</label><select id="' + id + '">' +
+          it.opts.map(o => '<option value="' + o[0] + '">' + esc(o[1]) + '</option>').join('') + '</select>';
+        const inp = f.querySelector('select');
+        inp.addEventListener('change', () => { C[it.k] = it.num ? +inp.value : inp.value; onCfg(it.k); });
+        ctlEls[it.k] = { it, inp };
+      } else {
+        f.innerHTML = '<label for="' + id + '">' + esc(it.label) + '<output id="o_' + it.k + '"></output></label><input type="range" id="' + id + '">';
+        const inp = f.querySelector('input'), out = f.querySelector('output');
+        inp.addEventListener('input', () => { C[it.k] = +inp.value; out.textContent = fmtVal(it, inp.value); onCfg(it.k); });
+        ctlEls[it.k] = { it, inp, out };
+      }
+      pane.appendChild(f);
+    });
+    panes.appendChild(pane);
+  });
+}
+function winInfo(win) {
+  const w = win && win.length ? win : [[0, 0]];
+  return { start: w[0][0], hours: w.reduce((s, x) => s + (x[1] - x[0]), 0) };
+}
+function setWin(id, start, hours) {
+  hours = Math.max(0, Math.min(24, hours)); start = Math.max(0, Math.min(23.5, start));
+  let win;
+  if (hours >= 24) win = [[0, 24]];
+  else if (hours <= 0) win = [[start, start]];
+  else if (start + hours <= 24) win = [[start, +(start + hours).toFixed(2)]];
+  else win = [[start, 24], [0, +(start + hours - 24).toFixed(2)]];
+  C.apps[id].win = win;
+}
+function buildApps() {
+  const wrap = document.createElement('div'); wrap.className = 'apps'; wrap.id = 'appsBox';
+  APPLIANCES.forEach(a => {
+    const r = document.createElement('div'); r.className = 'app';
+    r.innerHTML = '<div class="aname"><input type="checkbox" id="a_' + a.id + '" aria-label="' + esc(a.name) + '"><span>' + esc(a.name) + (a.surge > 1 ? ' <small style="color:var(--ink2)">(эхлэх гүйдэл ×' + a.surge + ')</small>' : '') + '</span></div>' +
+      '<div class="ain"><label>Чадал, Вт<input type="number" min="0" max="6000" step="10" id="w_' + a.id + '"></label>' +
+      '<label>Эхлэх цаг<input type="number" min="0" max="23.5" step="0.5" id="s_' + a.id + '"></label>' +
+      '<label>Хугацаа, ц/өдөр<input type="number" min="0" max="24" step="0.5" id="h_' + a.id + '"></label></div>';
+    r.querySelector('#a_' + a.id).addEventListener('change', e => { C.apps[a.id].on = e.target.checked; onCfg('apps'); });
+    r.querySelector('#w_' + a.id).addEventListener('input', e => { C.apps[a.id].w = Math.max(0, +e.target.value || 0); onCfg('apps'); });
+    const sh = () => { setWin(a.id, +$('#s_' + a.id).value || 0, +$('#h_' + a.id).value || 0); onCfg('apps'); };
+    r.querySelector('#s_' + a.id).addEventListener('input', sh);
+    r.querySelector('#h_' + a.id).addEventListener('input', sh);
+    wrap.appendChild(r);
+  });
+  return wrap;
+}
+function updateLoadSum() {
+  const el = $('#loadSum'); if (!el) return;
+  let wh = 0, peak = 0;
+  APPLIANCES.forEach(a => { const st = C.apps[a.id]; if (st.on) { wh += st.w * winInfo(st.win).hours; peak += st.w; } });
+  el.textContent = (C.sched ? 'Сонгосон ачааллын өдрийн хэрэглээ ойролцоогоор ' + (wh / 1000).toFixed(1) + ' кВт·ц.' : 'Хуваарь унтраалттай тул сонгосон хэрэгслүүд өдөржин ажиллана.') + ' Хэрэгслүүд зэрэг ажиллавал нийт ' + (peak / 1000).toFixed(1) + ' кВт.';
+}
+function refreshControls() {
+  const k48 = C.vn / 48;
+  for (const key in ctlEls) {
+    const { it, inp, out } = ctlEls[key];
+    if (it.type === 'check') inp.checked = !!C[key];
+    else if (it.type === 'select') inp.value = String(C[key]);
+    else {
+      let mn = it.min, mx = it.max;
+      if (it.scale) { mn = +(mn * k48).toFixed(1); mx = +(mx * k48).toFixed(1); }
+      inp.min = mn; inp.max = mx; inp.step = it.step; inp.value = C[key];
+      out.textContent = fmtVal(it, C[key]);
+    }
+  }
+  APPLIANCES.forEach(a => { const st = C.apps[a.id], wi = winInfo(st.win); $('#a_' + a.id).checked = st.on; $('#w_' + a.id).value = st.w; $('#s_' + a.id).value = wi.start; $('#h_' + a.id).value = +wi.hours.toFixed(2); });
+  updateInfo(); updateLoadSum();
+}
+function updateInfo() {
+  const inv = INVERTERS[C.inv];
+  $('#invInfo').textContent = inv.pn + ' Вт · PV оролт ' + inv.pvmax + ' Вт (DC/AC ' + inv.ratio + ') · ' + inv.mppt + ' MPPT · АҮК ' + inv.eff + '% · ажиллах температур ' + inv.tmin + '…' + inv.tmax + '°C · ' + inv.cost + ' $';
+  $('#modeInfo').textContent = C.sysType === 'hybrid' ? MODE_INFO[C.mode] : SYS_INFO[C.sysType];
+  $('#modeInfo').insertAdjacentHTML('beforeend', C.sysType === 'hybrid' ? '' : ' Гаралтын тэжээлийн дараалал зөвхөн хосолмол системд хамаарна.');
+  ctlEls.mode.inp.disabled = C.sysType !== 'hybrid';
+  const voc25 = C.series * PANEL.voc, nP = C.series * C.strings;
+  $('#pvHint').textContent = PANEL.name + ': ' + PANEL.pmax + ' Вт, Vmp ' + PANEL.vmp + ' В, Imp ' + PANEL.imp + ' А, АҮК ' + PANEL.eff + '%, ' + PANEL.dim + '. Одоогийн массив: ' + C.strings + ' string × ' + C.series + ' хавтан = ' + (nP * PANEL.pmax / 1000).toFixed(2) + ' кВт. String Voc ≈ ' + voc25.toFixed(0) + ' В (25°C), ' + (voc25 * (1 + 0.0028 * 55)).toFixed(0) + ' В (−30°C), хязгаар ' + C.vpvmax + ' В. String Vmp ≈ ' + (C.series * PANEL.vmp).toFixed(0) + ' В, MPPT-ийн доод хүчдэл ' + C.vpvmin + ' В. Voc нь ойролцоо утга. Эдгээр нь холболтоос тодорно.';
+  const inv2 = INVERTERS[C.inv];
+  $('#pvHint').textContent += inv2.mppt < 2 ? ' Энэ инвертер 1 MPPT-тэй тул сүүдэр бүх хавтанд нөлөөлнө.' : ' Энэ инвертер 2 MPPT-тэй тул сүүдэртсэн бүлэг бусдад нөлөөлөхгүй.';
+}
+const CHEM_DEF = { lfp:{ vabs:56.4, vswitch:48.0, vreturn:52.0, vcut:45.0, vrestart:50.0 }, la:{ vabs:57.6, vswitch:47.0, vreturn:51.0, vcut:44.5, vrestart:49.5 } };
+function onCfg(k) {
+  if (k === 'vn') {
+    const r = C.vn / C._vn; VKEYS.forEach(x => C[x] = +(C[x] * r).toFixed(1)); C._vn = C.vn;
+    S.soc = Math.min(1, S.soc); refreshControls();
+  }
+  if (k === 'chem') {
+    const d = CHEM_DEF[C.chem], r = C.vn / 48; VKEYS.forEach(x => C[x] = +(d[x] * r).toFixed(1)); refreshControls();
+  }
+  if (k === 'soc0') S.soc = C.soc0 / 100;
+  if (k === 'apps' || k === 'sched') updateLoadSum();
+  if (k === 'sysType' || k === 'mode' || k === 'inv' || k === 'series' || k === 'vpvmax') updateInfo();
+  if (k === 'sysType') S.latch = null;
+  refreshNow();
+}
+function replaceCfg(obj) {
+  Object.keys(C).forEach(x => delete C[x]); Object.assign(C, obj); C._vn = C.vn;
+}
+
+/* ---------- Диаграм ---------- */
+function setFlow(id, w, signed) {
+  const el = $('#' + id), a = Math.abs(w), on = a > 5;
+  el.classList.toggle('on', on); el.classList.toggle('rev', signed && w < 0);
+  el.style.strokeWidth = on ? Math.min(11, 3 + Math.sqrt(a) / 6.5) : 3;
+}
+function setTxt(id, t) { const e = $('#' + id); if (e.textContent !== t) e.textContent = t; }
+let WDC = { sig:'', m:null, st:null }, WDFALL = null;
+function simState() {
+  const key = (CURV === 'lab') ? 'lab' + LAB.id : 'main';
+  const st = BENCH.key === key ? BENCH : BSTATE[key];
+  return st && st.comps && st.comps.length ? st : null;
+}
+function syncFromWiring() {
+  const st = simState(); if (!st) return;
+  const ev = evalState(st); const d = benchDerive(ev, st.comps);
+  C.sysType = d.sysType; C.series = d.series || C.series; C.strings = d.strings;
+  if (d.bat) C.ah = d.ah;
+  APPLIANCES.forEach(a => C.apps[a.id].on = d.loads.includes(a.id));
+  S.latch = null; refreshControls();
+}
+function renderDiagram() {
+  const svg = $('#wd'); if (!svg || !svg.isConnected) return;
+  let st = simState();
+  if (!st) { if (!WDFALL) WDFALL = buildPresetState('hybrid'); st = WDFALL; }
+  const sig = JSON.stringify([st.comps.map(c => [c.id, c.type, c.x, c.y, c.on]), st.wires]);
+  if (WDC.sig !== sig) WDC = { sig, m:wdBuild(st), st };
+  const m = WDC.m, f = S.flow, bn = m.bounds;
+  const vb = bn[0] + ' ' + bn[1] + ' ' + (bn[2] - bn[0]) + ' ' + (bn[3] - bn[1]);
+  if (svg.getAttribute('viewBox') !== vb) svg.setAttribute('viewBox', vb);
+  const gnet = f.gridImport - f.exp, act = loadAt(C, f.h).act;
+  const roleP = { pv:f.pvUsedDC || 0, bat:f.batNet, grid:gnet, load:f.served };
+  const toward = { pv:true, bat:f.batNet >= 0, grid:gnet >= 0, load:false };
+  const rcol = { pv:'var(--pv-f)', bat:'var(--bat)', grid:'var(--grid)', load:'var(--load)' };
+  const fmtW = w => Math.abs(w) >= 1000 ? (w / 1000).toFixed(2) + ' кВт' : Math.round(w) + ' Вт';
+  const T = (x, y, t, st2) => '<text x="' + x + '" y="' + y + '" text-anchor="middle" style="font:12px var(--font);' + (st2 || 'fill:var(--ink)') + ';pointer-events:none">' + t + '</text>';
+  const nPV = st.comps.filter(c => c.type === 'pv').length || 1;
+  const fault = S.alerts.some(a => a.lvl === 'fault') || !f.invOn;
+  let s = '';
+  st.comps.forEach(c => {
+    const d = BT[c.type];
+    let ov = '';
+    if (c.type === 'pv') ov += T(d.w / 2, -6, Math.round((f.pvUsedDC || 0) / (f.nPanels || nPV)) + ' Вт', 'fill:var(--pv)');
+    else if (c.type === 'bat') ov += '<rect x="8" y="8" width="108" height="34" style="fill:var(--panel2)"/><rect x="8" y="8" width="' + (108 * f.soc) + '" height="34" style="fill:var(--bat);opacity:.85"/><text x="62" y="30" text-anchor="middle" style="font:600 13px var(--fontc);fill:#fff;paint-order:stroke;stroke:rgba(0,0,0,.45);stroke-width:2px">' + (f.soc * 100).toFixed(0) + '% · ' + f.vt.toFixed(1) + ' В</text>' + T(62, -6, (f.batNet < -1 ? 'цэнэглэж ' : f.batNet > 1 ? 'өгч ' : '') + fmtW(f.batNet), 'fill:var(--bat)');
+    else if (c.type === 'grid') ov += T(d.w / 2, -6, !f.gridAvail ? 'тасарсан' : fmtW(gnet) + (gnet < -1 ? ' (өгч)' : ''), 'fill:var(--grid)');
+    else if (d.app) { const on = C.apps[d.app] && C.apps[d.app].on; ov += T(d.w / 2, d.h + 14, !on ? 'сонгоогүй' : act[d.app] ? C.apps[d.app].w + ' Вт' : 'унтарсан', 'fill:' + (act[d.app] ? 'var(--load)' : 'var(--ink2)')); }
+    else if (c.type === 'inv') ov += T(d.w / 2, -8, 'T ' + f.tinv.toFixed(0) + '°C · ' + (f.invOn ? 'ажиллаж байна' : 'унтарсан'), fault ? 'fill:var(--bad)' : 'fill:var(--ink2)') + (fault ? '<rect x="-3" y="-3" width="' + (d.w + 6) + '" height="' + (d.h + 6) + '" rx="5" style="fill:none;stroke:var(--bad);stroke-width:3"/>' : '');
+    s += '<g transform="translate(' + c.x + ' ' + c.y + ')">' + compSVG(c) + ov + '</g>';
+  });
+  m.wires.forEach(w => {
+    const d = wirePath(w.A, w.B, w.i);
+    s += '<path d="' + d + '" style="fill:none;stroke:' + TCOL[w.A.t.t] + ';stroke-width:3;stroke-linejoin:round;opacity:.85"/>';
+    const p = w.role ? Math.abs(roleP[w.role]) : 0;
+    if (p > 5) {
+      let fwd = toward[w.role] ? w.dA >= w.dB : w.dA <= w.dB;
+      if (w.neg) fwd = !fwd;
+      s += '<path d="' + d + '" class="d-flow on' + (fwd ? '' : ' rev') + '" style="stroke:' + rcol[w.role] + ';stroke-width:' + Math.min(7, 2 + Math.sqrt(p) / 12) + ';stroke-linejoin:round"/>';
+    }
+  });
+  Object.keys(m.map).forEach(k => { const t = m.map[k]; s += '<circle cx="' + t.x + '" cy="' + t.y + '" r="4" style="fill:' + TCOL[t.t.t] + ';stroke:var(--panel);stroke-width:1.2"/>'; });
+  svg.innerHTML = s;
+}
+
+/* ---------- Үзүүлэлт, анхааруулга ---------- */
+function buildReads() {
+  const defs = [
+    ['rPV', 'pv', 'Нарны чадал'], ['rLoad', 'load', 'Ачаалал'], ['rBat', 'bat', 'Батарей'], ['rGrid', 'grid', 'Сүлжээ'],
+    ['rSoc', 'bat wide', 'Батарейн цэнэг'], ['rVoc', 'pv wide', 'Хавтангийн хүчдэл Voc'], ['rT', ' wide', 'Инвертерийн температур']
+  ];
+  $('#reads').innerHTML = defs.map(d => '<div class="read ' + d[1] + '"><div class="k">' + d[2] + '</div><div class="v" id="' + d[0] + 'v">–</div><div class="sub" id="' + d[0] + 's"></div>' +
+    (d[0] === 'rVoc' ? '<div class="vbar"><i id="vocFill"></i><b id="vocLim"></b></div>' : '') + '</div>').join('');
+}
+function setR(id, v, unit, sub) {
+  $('#' + id + 'v').innerHTML = v + (unit ? '<small>' + unit + '</small>' : ''); $('#' + id + 's').textContent = sub || '';
+}
+function renderReads() {
+  const f = S.flow, inv = INVERTERS[C.inv];
+  const kw = w => Math.abs(w) >= 1000 ? [(w / 1000).toFixed(2), 'кВт'] : [Math.round(w), 'Вт'];
+  let a = kw(f.pvUsedDC || 0); setR('rPV', a[0], a[1], 'Цацрагийн эрчим ' + (f.g * 100).toFixed(0) + '% · эс ' + f.tcell.toFixed(0) + '°C');
+  a = kw(f.served); setR('rLoad', a[0], a[1], 'хүсэлт ' + fmtP(f.L));
+  a = kw(Math.abs(f.batNet)); setR('rBat', (f.batNet < -1 ? '−' : f.batNet > 1 ? '+' : '') + a[0], a[1], f.batNet > 1 ? 'цэнэг өгч байна' : f.batNet < -1 ? 'цэнэглэж байна' : C.sysType === 'ongrid' ? 'батарей байхгүй' : 'зогсонги');
+  const gnet = f.gridImport - f.exp; a = kw(Math.abs(gnet));
+  setR('rGrid', (gnet < -1 ? '−' : '') + a[0], a[1], !f.gridAvail ? 'сүлжээ байхгүй' : gnet > 1 ? 'авч байна' : gnet < -1 ? 'өгч байна' : 'хэвийн');
+  setR('rSoc', (f.soc * 100).toFixed(0), '%', f.vt.toFixed(1) + ' В (хоосон ' + f.ocv.toFixed(1) + ' В) · ' + (f.ib > 0 ? 'гаргаж ' + f.ib.toFixed(0) : f.ib < 0 ? 'цэнэглэж ' + (-f.ib).toFixed(0) : '0') + ' А');
+  setR('rVoc', f.voc.toFixed(0), 'В', 'инвертерийн дээд хязгаар ' + C.vpvmax + ' В');
+  const mx = Math.max(C.vpvmax * 1.3, f.voc * 1.05);
+  $('#vocFill').style.width = Math.min(100, f.voc / mx * 100) + '%';
+  $('#vocFill').style.background = f.voc > C.vpvmax ? 'var(--bad)' : 'var(--pv-f)';
+  $('#vocLim').style.left = (C.vpvmax / mx * 100) + '%';
+  setR('rT', f.tinv.toFixed(0), '°C', 'ажиллах хязгаар ' + inv.tmin + '…' + inv.tmax + '°C · орчин ' + f.Tloc.toFixed(0) + '°C');
+}
+function renderAlerts() {
+  const box = $('#alerts');
+  const order = { fault:0, warn:1, info:2 };
+  const list = S.alerts.slice().sort((x, y) => order[x.lvl] - order[y.lvl]);
+  const sig = list.map(a => a.code + a.text).join('|') + '|' + S.latch;
+  if (box.dataset.sig === sig) return;
+  box.dataset.sig = sig;
+  box.innerHTML = list.length ? list.map(a => '<div class="al ' + a.lvl + '"><b>' + esc(a.title) + '</b>' + esc(a.text) + '</div>').join('')
+    : '<div class="al ok"><b>Систем хэвийн ажиллаж байна</b>Алдаа, анхааруулга алга.</div>';
+  $('#btnClear').disabled = !S.latch;
+}
+
+/* ---------- График ---------- */
+function niceStep(range, n) {
+  const raw = range / n, p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
+  return (m < 1.5 ? 1 : m < 3 ? 2 : m < 7 ? 5 : 10) * p;
+}
+function drawChart(svg, o) {
+  const W = Math.max(300, Math.round(svg.getBoundingClientRect().width) || 760), H = o.h, ml = 48, mr = o.mr ?? (o.yr ? 46 : 12), mt = 8, mb = 22, pw = W - ml - mr, ph = H - mt - mb;
+  const x0 = o.x0 ?? 0, x1 = o.x1 ?? 24;
+  const X = x => ml + (x - x0) / (x1 - x0) * pw;
+  const rng = ax => ax === 'r' ? o.yr : o.yl;
+  const Y = (v, ax) => { const r = rng(ax); return mt + ph - (v - r.min) / (r.max - r.min) * ph; };
+  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  let s = '';
+  const tk = (r) => { const st = niceStep(r.max - r.min, 4), t = []; for (let v = Math.ceil(r.min / st) * st; v <= r.max + 1e-9; v += st) t.push(+v.toFixed(6)); return t; };
+  tk(o.yl).forEach(v => { s += '<line class="ax" x1="' + ml + '" x2="' + (W - mr) + '" y1="' + Y(v, 'l') + '" y2="' + Y(v, 'l') + '" ' + (v === 0 ? 'style="stroke:var(--ink2)"' : 'style="opacity:.55"') + '/><text class="axt" x="' + (ml - 6) + '" y="' + (Y(v, 'l') + 4) + '" text-anchor="end">' + (o.yl.fmt ? o.yl.fmt(v) : v) + '</text>'; });
+  if (o.yr) tk(o.yr).forEach(v => { s += '<text class="axt" x="' + (W - mr + 6) + '" y="' + (Y(v, 'r') + 4) + '">' + (o.yr.fmt ? o.yr.fmt(v) : v) + '</text>'; });
+  (o.xt || []).forEach(v => { s += '<line class="ax" x1="' + X(v) + '" x2="' + X(v) + '" y1="' + mt + '" y2="' + (mt + ph) + '" style="opacity:.25"/><text class="axt" x="' + X(v) + '" y="' + (H - 6) + '" text-anchor="middle">' + (o.xf ? o.xf(v) : v) + '</text>'; });
+  if (o.ylab) s += '<text class="axt" x="' + ml + '" y="' + (mt + 10) + '" dx="6">' + o.ylab + '</text>';
+  (o.hl || []).forEach(l => { const y = Y(l.y, l.ax || 'l'); if (y >= mt && y <= mt + ph) s += '<line x1="' + ml + '" x2="' + (W - mr) + '" y1="' + y + '" y2="' + y + '" style="stroke:' + l.color + ';stroke-width:1.2" stroke-dasharray="5 4"/>'; });
+  (o.series || []).forEach(sr => {
+    const ax = sr.ax || 'l';
+    const pts = sr.pts || sr.data.map((v, i) => v == null ? null : [x0 + (i + 0.5) * (x1 - x0) / sr.data.length, v]);
+    const segs = []; let cur = [];
+    pts.forEach(p => { if (p == null) { if (cur.length) segs.push(cur); cur = []; } else cur.push(p); });
+    if (cur.length) segs.push(cur);
+    segs.forEach(sg => {
+      const d = sg.map((p, i) => (i ? 'L' : 'M') + X(p[0]).toFixed(1) + ' ' + Y(p[1], ax).toFixed(1)).join(' ');
+      if (sr.fill) { const yb = Y(Math.max(rng(ax).min, 0), ax); s += '<path d="' + d + ' L' + X(sg[sg.length - 1][0]).toFixed(1) + ' ' + yb + ' L' + X(sg[0][0]).toFixed(1) + ' ' + yb + ' Z" style="fill:' + sr.color + ';opacity:' + (sr.fo ?? .3) + '"/>'; }
+      s += '<path d="' + d + '" style="fill:none;stroke:' + sr.color + ';stroke-width:' + (sr.w || 2) + '"' + (sr.dash ? ' stroke-dasharray="' + sr.dash + '"' : '') + '/>';
+    });
+  });
+  (o.marks || []).forEach(m => { s += '<line x1="' + X(m.x) + '" x2="' + X(m.x) + '" y1="' + mt + '" y2="' + (mt + ph) + '" style="stroke:' + (m.color || 'var(--ink)') + ';stroke-width:1.5"/>'; });
+  svg.innerHTML = s;
+}
+const vals = a => a.filter(v => v != null);
+function rangeOf(arrs, minFloor, padTop) {
+  let mn = Infinity, mx = -Infinity;
+  arrs.forEach(a => vals(a).forEach(v => { mn = Math.min(mn, v); mx = Math.max(mx, v); }));
+  if (!isFinite(mn)) { mn = 0; mx = 1; }
+  mn = Math.min(mn, minFloor); mx = Math.max(mx, minFloor + 1);
+  const st = niceStep(mx - mn, 4);
+  return { min: Math.floor(mn / st) * st, max: Math.ceil(mx * (padTop || 1.05) / st) * st };
+}
+const hourTicks = [0, 3, 6, 9, 12, 15, 18, 21, 24];
+function renderCharts() {
+  const hh = S.t % 24;
+  const r1 = rangeOf([hist.pv, hist.load, hist.grid, hist.bat], 0, 1.08);
+  r1.max = Math.max(r1.max, 1000);
+  r1.fmt = v => Math.abs(v) >= 1000 ? (v / 1000) + ' кВт' : v;
+  drawChart($('#ch1'), { h:190, mr:46, yl:r1, xt:hourTicks, xf:v => v + ':00', marks:[{ x:hh }], series:[
+    { data:hist.pv, color:'var(--pv-f)', fill:true, fo:.35 }, { data:hist.load, color:'var(--load)' },
+    { data:hist.grid, color:'var(--grid)' }, { data:hist.bat, color:'var(--bat)' }] });
+  const vlo = C.vcut * 0.94, vhi = C.vabs * 1.02;
+  drawChart($('#ch2'), { h:170, yl:{ min:0, max:100, fmt:v => v + '%' }, yr:{ min:vlo, max:vhi, fmt:v => v.toFixed(0) + ' В' }, xt:hourTicks, xf:v => v + ':00', marks:[{ x:hh }],
+    hl:[{ y:C.vcut, ax:'r', color:'var(--bad)' }, { y:C.vabs, ax:'r', color:'var(--ink2)' }],
+    series:[{ data:hist.soc, color:'var(--bat)', fill:true, fo:.18 }, { data:hist.v, color:'var(--ink)', ax:'r', w:1.8 }] });
+  const r3 = rangeOf([hist.i], 0, 1.1); r3.min = Math.min(r3.min, -10); r3.max = Math.max(r3.max, 10);
+  drawChart($('#ch3'), { h:120, mr:46, yl:r3, ylab:'гүйдэл, А (+ гаргаж, − цэнэглэж)', xt:hourTicks, xf:v => v + ':00', marks:[{ x:hh }], series:[{ data:hist.i, color:'var(--load)' }] });
+}
+function renderEnergy() {
+  const E = S.E, k = x => (x / 1000).toFixed(2);
+  const gridIn = E.gridLoad + E.gridChg;
+  const self = E.load > 0 ? Math.max(0, 1 - E.gridLoad / E.load) * 100 : 0;
+  $('#dayCap').textContent = 'Өдөр ' + dayNo + ' · 00:00-оос ' + fmtT(S.t) + ' хүртэл';
+  const rows = [
+    ['Нарны боломжит үйлдвэрлэл', k(E.pvPot)], ['  сүүдрийн алдагдал', k(E.pvShade)], ['  DC оролтын хязгаарт хайчлагдсан', k(E.pvClip)],
+    ['Нар ашигласан (ачаалал, батарей, сүлжээ)', k(E.pvUsed)], ['Нар хаягдсан (батарей дүүрсэн, алдаа г.м.)', k(E.pvLost)],
+    ['Ачааллын хэрэглээ', k(E.load)], ['Хангагдаагүй ачаалал', k(E.unserved)],
+    ['Сүлжээнээс авсан', k(gridIn)], ['Сүлжээнд өгсөн', k(E.gridOut)],
+    ['Батарей цэнэглэсэн', k(E.batChg)], ['Батарейгаас гаргасан', k(E.batDis)], ['Ачааллын өөрийн хангалт (сүлжээнээс шууд авалтгүй)', self.toFixed(0) + ' %']
+  ];
+  $('#etable').innerHTML = '<tr><th>Үзүүлэлт</th><th>кВт·ц</th></tr>' + rows.map(r => '<tr><td>' + esc(r[0].replace(/^ +/, '— ')) + '</td><td>' + r[1] + '</td></tr>').join('');
+}
+
+/* ---------- Цикл ---------- */
+function recordHist() {
+  const f = S.flow, i = Math.min(NH - 1, Math.floor((S.t % 24) * 10));
+  hist.pv[i] = f.pvUsedDC || 0; hist.load[i] = f.served; hist.grid[i] = f.gridImport - f.exp; hist.bat[i] = f.batNet;
+  hist.soc[i] = f.soc * 100; hist.v[i] = f.vt; hist.i[i] = f.ib;
+}
+function refreshNow() {
+  if (!playing) { step(S, C, 0); }
+  renderAll();
+}
+function renderAll() {
+  $('#clock').textContent = fmtT(S.t);
+  if ($('#benchInv') && $('#benchInv').value != C.inv) $('#benchInv').value = C.inv;
+  if (document.activeElement !== $('#tSlider')) $('#tSlider').value = S.t % 24;
+  renderDiagram(); renderReads(); renderAlerts(); renderCharts(); renderEnergy();
+  if (typeof labRender === 'function') labRender();
+}
+let lastFrame = performance.now(), lastDraw = 0;
+function frame(now) {
+  const dtReal = Math.min(0.1, (now - lastFrame) / 1000); lastFrame = now;
+  if (playing) {
+    acc += dtReal * speed;
+    while (acc >= 1) {
+      step(S, C, 1); acc -= 1;
+      if (S.t >= 24) { S.t -= 24; S.E = newEnergy(); dayNo++; }
+      recordHist();
+      if (typeof labTick === 'function') labTick();
+    }
+  }
+  if (now - lastDraw > 130) { lastDraw = now; renderAll(); }
+  requestAnimationFrame(frame);
+}
+function setPlaying(p) { playing = p; const b = $('#btnPlay'); b.textContent = p ? '■ Зогсоох' : '▶ Эхлүүлэх'; b.classList.toggle('stop', p); b.classList.toggle('go', !p); $('#led').classList.toggle('on', p); }
+function restart(h, keepSoc) {
+  const soc = C.soc0; S = newState(C); if (h != null) S.t = h; S.soc = soc / 100;
+  S.vt = ocvAt(S.soc, C.chem, C.vn); acc = 0; dayNo = 1; resetHist(); step(S, C, 0); recordHist();
+}
+
+/* ---------- Лабораторийн сценари ---------- */
+const FAULT_SLIDE = {
+  lowv:  { cause:['Батарейн хүчдэл хэт буурах', 'Батарей сулрах', 'Хэт их ачаалал холбох'], effect:['Инвертер автоматаар унтарна', 'Системийн ажиллагаа зогсоно'], fix:['Батарейг цэнэглэх', 'Ачааллыг багасгах', 'Батарейн холболтыг шалгах'] },
+  ovv:   { cause:['Нарны хавтангийн хүчдэл хэт их', 'Буруу холболт', 'Инвертерийн оролтын хязгаараас давсан PV хүчдэл'], effect:['Инвертер хамгаалалт ажиллуулна', 'Систем түр зогсоно'], fix:['PV string хүчдэлийг шалгах', 'Хавтангийн холболтыг зөв тохируулах'] },
+  over:  { cause:['Инвертерийн чадлаас их ачаалал холбох', 'Олон цахилгаан хэрэгсэл зэрэг ажиллуулах'], effect:['Инвертер хална', 'Систем унтарна'], fix:['Ачааллыг бууруулах', 'Илүү өндөр чадлын инвертер ашиглах'] },
+  temp:  { cause:['Хэт халуун орчин', 'Сэнс ажиллахгүй байх', 'Агааржуулалт муу'], effect:['Инвертерийн үр ашиг буурна', 'Систем унтарч болно'], fix:['Инвертерийг сэрүүн орчинд байрлуулах', 'Сэнс болон агааржуулалтыг шалгах'] },
+  gridf: { cause:['Сүлжээний хүчдэл хэвийн бус', 'Давтамжийн өөрчлөлт', 'Сүлжээ тасрах'], effect:['Grid-tied инвертер автоматаар сална'], fix:['Сүлжээний параметрийг шалгах', 'Хүчдэл тогтворжуулагч ашиглах'] }
+};
+/* ---------- Горим харьцуулалт ---------- */
+function runCompare() {
+  const modes = ['SBU', 'SUB', 'USB', 'SELF', 'PEAK'];
+  const res = modes.map(m => runDay(C, m));
+  const names = { SBU:'SBU (Нар→Батарей→Сүлжээ)', SUB:'SUB (Нар→Сүлжээ→Батарей)', USB:'USB (Сүлжээ→Нар→Батарей)', SELF:'Self-consumption', PEAK:'Peak-shaving' };
+  const ok = res.filter(r => r.unserved < 0.01);
+  const best = (ok.length ? ok : res).reduce((a, b) => a.gridIn <= b.gridIn ? a : b);
+  const mxGrid = Math.max(...res.map(r => r.gridIn), 0.01);
+  let h = '<table><tr><th>Горим</th><th>Сүлжээнээс авсан, кВт·ц</th><th>Өөрийн хангалт, %</th><th>Нар ашигласан, кВт·ц</th><th>Нар хаягдсан, кВт·ц</th><th>Сүлжээнд өгсөн, кВт·ц</th><th>Батарейн цикл</th><th>Эцсийн SOC, %</th><th>Хангагдаагүй, кВт·ц</th></tr>';
+  res.forEach(r => { h += '<tr' + (r === best ? ' class="best"' : '') + '><td>' + names[r.mode] + '</td><td>' + r.gridIn.toFixed(2) + '</td><td>' + r.self.toFixed(0) + '</td><td>' + r.pvUsed.toFixed(2) + '</td><td>' + r.pvLost.toFixed(2) + '</td><td>' + r.gridOut.toFixed(2) + '</td><td>' + r.cycles.toFixed(2) + '</td><td>' + r.soc.toFixed(0) + '</td><td>' + r.unserved.toFixed(2) + '</td></tr>'; });
+  h += '</table><div class="bars" aria-label="Сүлжээнээс авсан энерги">' + res.map(r => '<div class="bar"><span>' + r.mode + '</span><div class="tr"><i style="width:' + (r.gridIn / mxGrid * 100) + '%"></i></div><span class="num">' + r.gridIn.toFixed(1) + ' кВт·ц</span></div>').join('') + '</div>';
+  $('#cmpOut').innerHTML = h;
+  const gm = C.gridMode;
+  $('#cmpNote').textContent = 'Тодруулсан мөр нь хангагдаагүй ачаалалгүй, сүлжээнээс хамгийн бага авсан горим. Ачаалал ' + (res[0].load).toFixed(1) + ' кВт·ц, нарны боломжит үйлдвэрлэл ' + res[0].pvPot.toFixed(1) + ' кВт·ц.' +
+    (gm === 'out' ? ' Сүлжээ тасарсан тул горимуудын ялгаа байхгүй.' : '') +
+    ' Self-consumption нь SBU-тай төстэй боловч нөөц цэнэгтэй, илүүдлээ сүлжээнд өгдөг. Peak-shaving шөнө сүлжээнээс цэнэглэдэг тул сүлжээнээс авалт нэмэгддэг ч оргил цагийн авалтыг багасгана.';
+}
+
+/* ---------- DC/AC ---------- */
+const DA = { season:'equinox', kwp:3.6, ac:3000 };
+function buildDcac() {
+  const el = $('#dcacCtl');
+  el.innerHTML =
+    '<div class="f"><label for="da_s">Улирал</label><select id="da_s">' + Object.entries(SEASONS).map(([k, v]) => '<option value="' + k + '">' + v.label + '</option>').join('') + '</select></div>' +
+    '<div class="f"><label for="da_k">Хавтангийн DC чадал<output id="da_ko"></output></label><input type="range" id="da_k" min="1" max="9" step="0.1"></div>' +
+    '<div class="f"><label for="da_a">Инвертерийн AC чадал<output id="da_ao"></output></label><input type="range" id="da_a" min="1000" max="6000" step="100"></div>';
+  $('#da_s').value = DA.season; $('#da_k').value = DA.kwp; $('#da_a').value = DA.ac;
+  $('#da_s').addEventListener('change', e => { DA.season = e.target.value; renderDcac(); });
+  $('#da_k').addEventListener('input', e => { DA.kwp = +e.target.value; renderDcac(); });
+  $('#da_a').addEventListener('input', e => { DA.ac = +e.target.value; renderDcac(); });
+}
+function renderDcac() {
+  $('#da_ko').textContent = DA.kwp.toFixed(1) + ' кВт'; $('#da_ao').textContent = DA.ac + ' Вт';
+  const d = dcacDay(DA.kwp, DA.ac, DA.season), ratio = DA.kwp * 1000 / DA.ac;
+  const cell = (k, v, u, sub) => '<div class="read"><div class="k">' + k + '</div><div class="v">' + v + '<small>' + u + '</small></div><div class="sub">' + (sub || '') + '</div></div>';
+  $('#dcacReads').innerHTML = cell('DC/AC харьцаа', ratio.toFixed(2), '', ratio < 1.1 ? 'хавтан дутуу ашиглагдаж болзошгүй' : ratio <= 1.35 ? 'практикт тохиромжтой хүрээ' : 'хайчлалт нэмэгдэнэ') +
+    cell('Инвертерээс гарсан', d.eAC.toFixed(1), 'кВт·ц', 'ойролцоо өдрийн утга') + cell('Хайчлагдсан', d.eClip.toFixed(2), 'кВт·ц', d.clipPct.toFixed(1) + '% DC-ээс') +
+    cell('1 кВт AC-д ногдох', (d.eAC / (DA.ac / 1000)).toFixed(2), 'кВт·ц', 'нэг кВт инвертерийн ашиглалт');
+  const pts = d.pts;
+  const mx = Math.max(DA.ac * 1.15, ...pts.map(p => p.dc)) * 1.05;
+  const st = niceStep(mx, 4);
+  drawChart($('#dcacCh1'), { h:200, yl:{ min:0, max:Math.ceil(mx / st) * st, fmt:v => v >= 1000 ? (v / 1000) + ' кВт' : v }, xt:hourTicks, xf:v => v + ':00',
+    hl:[{ y:DA.ac, color:'var(--ink)' }],
+    series:[{ pts:pts.map(p => [p.h, p.dc]), color:'var(--bad)', fill:true, fo:.45, w:1.5 }, { pts:pts.map(p => [p.h, p.ac]), color:'var(--pv-f)', fill:true, fo:.9, w:2 }] });
+  const mk = (season, color) => { const q = []; for (let r = 1; r <= 2.0001; r += 0.05) q.push([r, dcacDay(r * DA.ac / 1000, DA.ac, season).clipPct]); return { pts:q, color }; };
+  const s1 = mk('summer', 'var(--pv-f)'), s2 = mk('equinox', 'var(--grid)'), s3 = mk('winter', 'var(--bat)');
+  const ymax = Math.max(5, ...[s1, s2, s3].map(s => s.pts[s.pts.length - 1][1]));
+  const st2 = niceStep(ymax, 4);
+  drawChart($('#dcacCh2'), { h:200, x0:1, x1:2, xt:[1, 1.2, 1.4, 1.6, 1.8, 2], xf:v => v.toFixed(1), yl:{ min:0, max:Math.ceil(ymax / st2) * st2, fmt:v => v + '%' },
+    marks:[{ x:Math.min(2, Math.max(1, ratio)), color:'var(--ink)' }], hl:[{ y:2, color:'var(--ink2)' }], series:[s1, s2, s3], ylab:'хайчлагдсан энерги, % (тасархай: 2%)' });
+}
+
+/* ---------- Инвертер сонголт ---------- */
+const SEL = { load:3000, kwp:3.6, minT:-20, mppt2:false, wP:3, wE:3, wT:2 };
+function buildSelect() {
+  $('#selCtl').innerHTML =
+    '<div class="f"><label for="s_l">Ачааллын дээд чадал<output id="s_lo"></output></label><input type="range" id="s_l" min="500" max="6000" step="100"></div>' +
+    '<div class="f"><label for="s_k">Нарны хавтангийн чадал<output id="s_ko"></output></label><input type="range" id="s_k" min="1" max="9" step="0.1"></div>' +
+    '<div class="f"><label for="s_t">Байршлын хамгийн хүйтэн температур<output id="s_to"></output></label><input type="range" id="s_t" min="-45" max="10" step="1"></div>' +
+    '<div class="f chk"><input type="checkbox" id="s_m"><label for="s_m">Хавтан хоёр өөр чиглэл, сүүдэртэй (2 MPPT шаардлагатай)</label></div>' +
+    '<div class="fs-title">Оноонд өгөх ач холбогдол</div>' +
+    '<div class="f"><label for="s_wp">Үнэ<output id="s_wpo"></output></label><input type="range" id="s_wp" min="0" max="5" step="1"></div>' +
+    '<div class="f"><label for="s_we">Ашигт үйлийн коэффициент<output id="s_weo"></output></label><input type="range" id="s_we" min="0" max="5" step="1"></div>' +
+    '<div class="f"><label for="s_wt">Хүйтний нөөц<output id="s_wto"></output></label><input type="range" id="s_wt" min="0" max="5" step="1"></div>';
+  const bind = (id, k, num) => { const e = $('#' + id); if (e.type === 'checkbox') { e.checked = SEL[k]; e.addEventListener('change', () => { SEL[k] = e.checked; renderSelect(); }); } else { e.value = SEL[k]; e.addEventListener('input', () => { SEL[k] = +e.value; renderSelect(); }); } };
+  bind('s_l', 'load'); bind('s_k', 'kwp'); bind('s_t', 'minT'); bind('s_m', 'mppt2'); bind('s_wp', 'wP'); bind('s_we', 'wE'); bind('s_wt', 'wT');
+}
+function renderSelect() {
+  $('#s_lo').textContent = SEL.load + ' Вт'; $('#s_ko').textContent = SEL.kwp.toFixed(1) + ' кВт'; $('#s_to').textContent = SEL.minT + '°C';
+  $('#s_wpo').textContent = SEL.wP; $('#s_weo').textContent = SEL.wE; $('#s_wto').textContent = SEL.wT;
+  const costs = INVERTERS.map(i => i.cost), cmin = Math.min(...costs), cmax = Math.max(...costs);
+  const rows = INVERTERS.map((v, idx) => {
+    const why = [];
+    if (v.pn < SEL.load) why.push('чадал дутуу');
+    const r = SEL.kwp * 1000 / v.pn;
+    if (r > v.ratio + 1e-6) why.push('DC/AC ' + r.toFixed(2) + ' > ' + v.ratio);
+    if (v.tmin > SEL.minT) why.push('хүйтэнд тохирохгүй');
+    if (SEL.mppt2 && v.mppt < 2) why.push('1 MPPT');
+    let score = null;
+    if (!why.length) {
+      const nP = 1 - (v.cost - cmin) / (cmax - cmin), nE = (v.eff - 92) / (98.3 - 92), nT = Math.min(1, (SEL.minT - v.tmin) / 25);
+      const wsum = SEL.wP + SEL.wE + SEL.wT || 1;
+      score = Math.round(100 * (SEL.wP * nP + SEL.wE * nE + SEL.wT * nT) / wsum);
+    }
+    return { v, idx, why, score, r };
+  });
+  const top = rows.filter(r => r.score != null).sort((a, b) => b.score - a.score)[0];
+  $('#selTable').innerHTML = '<tr><th>Загвар</th><th>Нэрлэсэн чадал, Вт</th><th>Дээд PV оролт, Вт</th><th>Дээд DC/AC</th><th>MPPT</th><th>АҮК, %</th><th>Температур, °C</th><th>Үнэ, $</th><th>$ / кВт</th><th>Шаардлага</th><th>Оноо</th><th></th></tr>' +
+    rows.map(o => { const v = o.v; return '<tr class="' + (o === top ? 'top' : '') + '" style="' + (o.why.length ? 'opacity:.62' : '') + '"><td><b>' + esc(v.brand) + '</b> ' + esc(v.name) + '</td><td>' + v.pn + '</td><td>' + v.pvmax + '</td><td>' + v.ratio.toFixed(1) + '</td><td>' + v.mppt + '</td><td>' + v.eff + '</td><td>' + v.tmin + '…' + v.tmax + '</td><td>' + v.cost.toFixed(0) + '</td><td>' + (v.cost / (v.pn / 1000)).toFixed(0) + '</td><td>' + (o.why.length ? '<span class="no">✗ ' + esc(o.why.join(', ')) + '</span>' : '<span class="yes">✓ тохирно</span>') + '</td><td>' + (o.score != null ? '<span class="score">' + o.score + '</span>' : '–') + '</td><td><button class="btn ghost small" data-inv="' + o.idx + '">Симуляторт</button></td></tr>'; }).join('');
+  $('#selNote').textContent = top ? 'Хамгийн өндөр оноотой: ' + top.v.brand + ' ' + top.v.name + '. Оноо нь үнэ, АҮК, хүйтний нөөцийн жигнэсэн дундаж (0–100) бөгөөд зөвхөн шаардлага хангасан загварт тооцогдоно.' : 'Одоогийн шаардлагыг хангах загвар алга. Ачаалал, хавтангийн чадал эсвэл хүйтний хязгаарыг сулруулж үзнэ үү.';
+  $$('#selTable button').forEach(b => b.addEventListener('click', () => {
+    C.inv = +b.dataset.inv; C.series = 2; C.strings = Math.max(1, Math.round(SEL.kwp / (2 * PANEL.pmax / 1000))); C.tamb = Math.max(C.tamb, -45);
+    refreshControls(); refreshNow(); go('sim');
+  }));
+}
+
+/* ---------- Онол ---------- */
+const THEORY = [
+  ['Системийн төрлүүд', '<table><tr><th>Төрөл</th><th>Онцлог</th></tr><tr><td>Сүлжээтэй зэрэгцээ</td><td>Батарей шаардлагагүй. Илүүдэл эрчим хүчийг сүлжээнд буцааж өгнө. Сүлжээ тасарвал систем ажиллахгүй (аюулгүй байдлын хамгаалалт).</td></tr><tr><td>Сүлжээнээс тусдаа</td><td>Батарей зайлшгүй хэрэгтэй. Нарны хавтан → батарей → ачаалал. Алслагдсан газарт тохиромжтой.</td></tr><tr><td>Хосолмол</td><td>Эрчим хүчний уян хатан удирдлага. Илүүдлийг батарейд хадгална, сүлжээ тасарсан үед нөөц болдог.</td></tr></table><p>Нарны цахилгаан үүсгүүр нарны гэрлийг цахилгаан болгоно. Батарей цахилгааны энергийг химийн энерги болгон хуримтлуулна. Инвертер DC/DC, DC/AC, AC/DC хувиргуурыг удирдан хянана. Тоолуур хэрэглэсэн энергийг кВт·цагаар тооцно.</p>'],
+  ['Инвертерийн үндсэн үүрэг ба төрөл', '<p>Инвертер нь тогтмол гүйдлийг (DC) хувьсах гүйдэл (AC) болгон хувиргадаг цахилгаан электрон төхөөрөмж юм. Үндсэн үүрэг: DC → AC хувиргалт, хүчдэл тогтворжуулах, давтамж тохируулах, ачаалал хуваарилах, батарейн цэнэгийг удирдах.</p><p>НЦҮ-ийн хувиргуурын технологи: стринг инвертер, хосолмол инвертер, микроинвертер, төвлөрсөн инвертер. Төвлөрсөн инвертер ихэвчлэн арван кВт-аас дээш чадалтай, гурван фазын сүлжээнд холбогдох станцад ашиглагддаг. Үр ашиг өндөр, өртөг багатай боловч өндөр хүчдэлийн DC кабель шаардаж, хэсэгчилсэн сүүдэрт чадлын зөрүү үүснэ.</p>'],
+  ['Гаралтын тэжээлийн дараалал (Output source priority)', '<table><tr><th>Горим</th><th>Дараалал</th><th>Тайлбар</th></tr><tr><td>SBU</td><td>Нар → Батарей → Сүлжээ</td><td>Хамгийн хэмнэлттэй. Батарей дуусах үед л төв шугам руу шилжинэ.</td></tr><tr><td>SUB</td><td>Нар → Сүлжээ → Батарей</td><td>Нарын чадал дутвал сүлжээнээс нөхнө. Батарейг зөвхөн тог тасарсан үед ашиглана.</td></tr><tr><td>USB</td><td>Сүлжээ → Нар → Батарей</td><td>Сүлжээг гол эх үүсвэр болгоно. Тог тасралтгүй байхыг чухалчилдаг газарт тохиромжтой.</td></tr></table><p>Нар ба батарейтай системийн тохиргоо: Self-consumption өөрийн ачааллаа аль болох нар ба батарейгаар хангахыг оролдоно. Peak-shaving оргил ачааллыг бууруулахыг зорьж, батарейг урьдчилж цэнэглэнэ.</p>'],
+  ['MPPT: хамгийн их чадал дагагч', '<ul><li>Тогтмол хяналт: MPPT хавтангаас ирэх хүчдэл, гүйдлийг байнга хэмжинэ.</li><li>Хамгийн их цэгийг хайх: Perturb and Observe алгоритмаар хүчдэлийг бага зэрэг өөрчилж, чадал өсч байвал тэр зүгт үргэлжлүүлнэ.</li><li>DC-DC хувиргалт: хавтангийн өндөр хүчдэлийг батарей цэнэглэхэд тохиромжтой бага хүчдэл болгож, илүү гүйдэл гаргана.</li></ul><table><tr><th></th><th>1 MPPT</th><th>2 MPPT</th></tr><tr><td>Оролт</td><td>Бүх хавтан нэг ижил чиглэл, нөхцөлд байх ёстой</td><td>Хоёр тусдаа оролт, суваг бүр бие даан хамгийн их цэгээ хайна</td></tr><tr><td>Байршил</td><td>Нэг талын дээвэр, ижил өнцөг</td><td>Дээврийн хоёр тал (зүүн, баруун) эсвэл өөр өнцөг</td></tr><tr><td>Сүүдэр</td><td>Нэг хавтан сүүдэртвэл бүх хавтангийн чадал унана</td><td>Нэг бүлэг сүүдэртсэн ч нөгөө бүлэг бүрэн чадлаараа ажиллана</td></tr></table>'],
+  ['Инвертерийн алдаанууд', '<table><tr><th>Алдаа</th><th>Шалтгаан</th><th>Шийдэл</th></tr><tr><td>Low Voltage</td><td>Батарейн хүчдэл хэт буурсан, батарей сул, хэт их ачаалал</td><td>Батарей цэнэглэх, ачааллыг багасгах, холболт шалгах</td></tr><tr><td>Over Voltage</td><td>PV хүчдэл инвертерийн оролтын хязгаараас давсан, буруу холболт</td><td>PV стринг хүчдэл шалгах, холболтыг зөв тохируулах</td></tr><tr><td>Overload</td><td>Инвертерийн чадлаас их ачаалал, олон хэрэгсэл зэрэг ажиллах</td><td>Ачаалал бууруулах, илүү чадалтай инвертер</td></tr><tr><td>Over Temperature</td><td>Халуун орчин, сэнс ажиллахгүй, агааржуулалт муу</td><td>Сэрүүн газар байрлуулах, сэнс шалгах</td></tr><tr><td>Grid Fault</td><td>Сүлжээний хүчдэл хэвийн бус, давтамж өөрчлөгдөх, тасрах</td><td>Сүлжээний параметр шалгах, хүчдэл тогтворжуулагч</td></tr></table>'],
+  ['Температур, хамгаалалтын зэрэг, АҮК', '<p>Инвертерийн ажиллах температур үйлдвэрлэгчээс хамаарч −45°C-аас +60°C хүртэл өөр байна (Deye −45…60, Huawei, GWD −25…60, MUST 0…50). Хөргөлтийн загвар чухал бөгөөд өндөр АҮК-тай инвертер дулааныг сайн ялгаруулдаг. Хүйтэн температур электроникийн ажиллагаанд саад болж, конденсац үүсгэж болно.</p><p>IP (Ingress Protection) зэрэг нь хатуу биет ба шингэнээс хамгаалах түвшинг хоёр оронтой тоогоор илэрхийлнэ. IP65 нь тоос нэвтрэхгүй, дурын чиглэлээс шүрших усны тийрэлтэнд тэсвэртэй гэсэн үг.</p><p>Өндөр АҮК-тай инвертер илүү их энерги үйлдвэрлэхээс гадна дулааны ялгарлыг бууруулж, гаралтын чанарыг сайжруулж, төхөөрөмжийн насжилтыг уртасгана.</p>'],
+  ['DC/AC харьцаа', '<p>Практикт DC ба AC чадлын харьцаа ойролцоогоор 1.2 байвал чадлын алдагдлыг бууруулж, илүү хэмнэлт гаргана. Хавтан бүтэн чадлаараа байнга ажилладаггүй: нарны өнцөг, температур, тоос, бохирдол, үүлэрхэг цаг агаар нөлөөлнө. Тиймээс жилийн нийт үйлдвэрлэлийг нэмэгдүүлэхийн тулд DC чадлыг арай илүү сонгодог. Хичээлд харьцуулсан инвертерүүдийн дээд DC/AC харьцаа 1.1-ээс 2.0 хооронд байна.</p>'],
+  ['Батарей: хүчдэл ба цэнэглэлт', '<p>Батарейн хүчдэл нь инвертерийн үндсэн оролтын параметр. Хүчдэл буурвал гаралтын чадал буурч, low voltage protection ажиллан унтарч, ачаалал тасалдах магадлалтай. Хүчдэл ихэсвэл over-voltage protection идэвхжиж, батарей гэмтэх эрсдэл нэмэгдэнэ.</p><p>48 В системийн жишээ: cut-off 44–46 В (гүн цэнэг алдалт), нэрлэсэн 48 В, бүрэн цэнэг 54–58 В.</p><p>Ихэнх батарей хоёр алхамтай цэнэглэнэ: эхлээд тогтмол гүйдлийн (CC), дараа нь тогтмол хүчдэлийн (CV) арга. Цэнэглэлтийг батарей менежментийн систем (BMS) шийднэ.</p>'],
+  ['Сүлжээний холболтын стандарт ба цахилгааны чанар', '<p>Олон улсын стандартууд: IEC 61727, VDE-AR-N 4105 (Герман), IEEE 1547 (АНУ), UL 1741, G59/3 (Их Британи), CEI 0-21 (Итали).</p><p>Монголд (MNS 1778:2007): хүчдэлийн хэлбэлзэл нэрлэсний ±5% (хэвийн), ±10% (хязгаар); давтамжийн хэлбэлзэл ±0.2 Гц (хэвийн), ±0.4 Гц (хязгаар); 0.38 кВ-ын сүлжээнд нийт гармоник гажуудал 8% хүртэл. Хичээлд харьцуулсан инвертерүүдийн THD 3–5%.</p>']
+];
+function buildTheory() {
+  $('#theoryBox').innerHTML = THEORY.map((t, i) => '<details class="th"' + (i === 2 ? ' open' : '') + '><summary>' + esc(t[0]) + '</summary><div class="body">' + t[1] + '</div></details>').join('');
+}
+
+/* ---------- Тест ---------- */
+const QUIZ = [
+  { q:'SBU горимд эх үүсвэрийн дараалал аль нь вэ?', o:['Сүлжээ → Нар → Батарей', 'Нар → Батарей → Сүлжээ', 'Нар → Сүлжээ → Батарей', 'Батарей → Нар → Сүлжээ'], a:1, e:'SBU: эхлээд нар, хүрэлцэхгүй бол батарей, батарей дуусахад л сүлжээ.' },
+  { q:'Нэг хавтан сүүдэртэхэд 1 MPPT-тэй инвертерт юу болох вэ?', o:['Зөвхөн сүүдэртсэн хавтан чадлаа алдана', 'Бүх хавтангийн чадал дагаж буурна', 'Инвертер хэт халдаг', 'Юу ч өөрчлөгдөхгүй'], a:1, e:'1 MPPT нэг оролттой тул бүх хавтан нэг нөхцөлд байх ёстой. 2 MPPT бүлэг бүрийг тусад нь удирдана.' },
+  { q:'Over Voltage алдаа өвлийн өглөө яагаад илүү гардаг вэ?', o:['Хүйтэнд PV хавтангийн хүчдэл өсдөг', 'Батарей хэт цэнэглэгддэг', 'Сүлжээний хүчдэл нэмэгддэг', 'Инвертер хөлддөг'], a:0, e:'Хавтангийн Voc температур буурахад өсдөг тул цуваа холболтын хүчдэл инвертерийн хязгаараас хэтэрч болно.' },
+  { q:'DC/AC чадлын харьцаа практикт ойролцоогоор хэд байх нь тохиромжтой вэ?', o:['0.8', '1.0', '1.2', '3.0'], a:2, e:'Хавтан бүтэн чадлаараа ховор ажилладаг тул DC чадлыг ойролцоогоор 1.2 дахин илүү сонгодог.' },
+  { q:'Сүлжээтэй зэрэгцээ (батарейгүй) систем сүлжээ тасрахад яах вэ?', o:['Нарны чадлаар ачааллыг үргэлжлүүлэн тэжээнэ', 'Батарейгаар ажиллана', 'Аюулгүй байдлын үүднээс унтарна', 'Дизель генератор асаана'], a:2, e:'Anti-islanding хамгаалалт: сүлжээ тасрахад инвертер унтарна.' },
+  { q:'48 В системийн cut-off хүчдэл ойролцоогоор хэд байх вэ?', o:['38–40 В', '44–46 В', '54–58 В', '60–64 В'], a:1, e:'Слайдын жишээгээр cut-off 44–46 В, нэрлэсэн 48 В, бүрэн цэнэг 54–58 В.' },
+  { q:'Хүчдэлийн хэлбэлзлийн хязгаарын зөвшөөрөгдөх утга (MNS 1778) нэрлэсний хэдэн хувь вэ?', o:['±1%', '±5%', '±10%', '±20%'], a:2, e:'Хэвийн зөвшөөрөгдөх ±5%, хязгаарын зөвшөөрөгдөх ±10%.' },
+  { q:'Инвертерийн үндсэн үүрэг юу вэ?', o:['DC-г AC болгон хувиргах', 'AC-г DC болгон хуримтлуулах', 'Цахилгаан үйлдвэрлэх', 'Хүчдэлийг тогтмол өсгөх'], a:0, e:'Инвертер тогтмол гүйдлийг (DC) хувьсах гүйдэл (AC) болгон хувиргадаг.' },
+  { q:'Төвлөрсөн инвертер ихэвчлэн хаана хэрэглэгддэг вэ?', o:['Гурван фазын сүлжээнд холбогдох станцад', 'Нэг өрөөний гэрэлд', 'Гар утсанд', 'Зөвхөн батарейд'], a:0, e:'Төвлөрсөн инвертер арван кВт-аас дээш чадалтай, гурван фазын сүлжээнд холбогдох станцад ашиглагддаг.' },
+  { q:'MPPT гэж юу вэ?', o:['Хамгийн их чадлын цэгийг дагагч', 'Батарейн хамгаалалт', 'Давтамж тохируулагч', 'Тоолуур'], a:0, e:'Maximum Power Point Tracking: хавтангаас авах чадлыг хамгийн их түвшинд барих алгоритм.' },
+  { q:'MPPT-ийн алдартай алгоритм аль нь вэ?', o:['Perturb and Observe', 'Power and Output', 'Peak and Offset', 'Phase and Oscillate'], a:0, e:'Perturb and Observe: хүчдэлийг бага зэрэг өөрчилж, чадал өсөж байвал тэр зүгт үргэлжлүүлнэ.' },
+  { q:'Сүлжээнээс тусдаа (off-grid) системд батарей хэрэгтэй юу?', o:['Тийм, зайлшгүй', 'Үгүй', 'Зөвхөн өвөл', 'Зөвхөн зун'], a:0, e:'Сүлжээгүй тул нар байхгүй үед ачааллыг батарей тэжээх ёстой.' },
+  { q:'Сүлжээтэй зэрэгцээ систем илүүдэл энергийг юу хийдэг вэ?', o:['Сүлжээнд буцааж өгнө', 'Газардуулгад гаргана', 'Дулаан болгон алдана', 'Батарейд хадгална'], a:0, e:'Батарей байхгүй тул илүүдлийг сүлжээнд буцааж өгдөг.' },
+  { q:'Хосолмол системийн гол давуу тал юу вэ?', o:['Илүүдлийг батарейд хадгалж, сүлжээ тасрахад нөөц болно', 'Батарей шаардахгүй', 'Зөвхөн сүлжээнээс ажиллана', 'Нарыг ашиглахгүй'], a:0, e:'Хосолмол систем эрчим хүчийг уян хатан удирдаж, илүүдлийг хадгалан, нөөц эх үүсвэр болдог.' },
+  { q:'USB горимд ачааллыг хамгийн түрүүнд хэн тэжээх вэ?', o:['Сүлжээ', 'Нар', 'Батарей', 'Генератор'], a:0, e:'USB: Сүлжээ → Нар → Батарей. Нар батарейг цэнэглэнэ.' },
+  { q:'SUB горимд нарны чадал дутахад дутууг хэн нөхөх вэ?', o:['Сүлжээ', 'Батарей', 'Дизель', 'Хэн ч үгүй'], a:0, e:'SUB: Нар → Сүлжээ → Батарей. Батарей зөвхөн сүлжээ тасрахад ажиллана.' },
+  { q:'Peak-shaving горимд батарейг хэзээ сүлжээнээс урьдчилж цэнэглэх вэ?', o:['Шөнө (хямд тариф)', 'Үд дунд', 'Оргил цагт', 'Хэзээ ч үгүй'], a:0, e:'Шөнө урьдчилж цэнэглээд оргил цагт сүлжээнээс авах чадлыг бууруулна.' },
+  { q:'Self-consumption горимын зорилго юу вэ?', o:['Өөрийн үйлдвэрлэсэн энергийг өөрөө аль болох хэрэглэх', 'Сүлжээнээс аль болох их авах', 'Батарейг хоослох', 'Инвертерийг унтраах'], a:0, e:'Нар болон батарейгаар ачааллыг хангаж, сүлжээнээс авалтыг бууруулна.' },
+  { q:'Over Temperature алдааны шалтгаан аль нь вэ?', o:['Сэнс ажиллахгүй, агааржуулалт муу', 'Батарей дүүрсэн', 'Сүлжээ тасарсан', 'Нарны хавтан бохирдсон'], a:0, e:'Халуун орчин, хөргөлт муу үед инвертерийн дулаан гарч чадахгүй хэт халдаг.' },
+  { q:'DC/AC харьцаа 2.0 үед өндөр нартай цагт юу болох вэ?', o:['Чадал хайчлагдана (clipping)', 'Чадал хоёр дахин нэмэгдэнэ', 'Батарей цэнэглэгдэхгүй', 'Юу ч болохгүй'], a:0, e:'DC чадал инвертерийн AC чадлаас хэт давахад оргил цагт илүүдэл хайчлагдана.' },
+  { q:'48 В системийн бүрэн цэнэгийн хүчдэл ойролцоогоор хэд вэ?', o:['54–58 В', '44–46 В', '30–34 В', '70–80 В'], a:0, e:'Слайдын жишээгээр бүрэн цэнэг 54–58 В.' },
+  { q:'Батарей цэнэглэлтийн эхний шат аль нь вэ?', o:['Тогтмол гүйдэл (CC)', 'Тогтмол хүчдэл (CV)', 'Хоёулаа зэрэг', 'Цэнэглэлтгүй'], a:0, e:'Эхлээд CC (тогтмол гүйдэл), дараа нь CV (тогтмол хүчдэл) аргаар цэнэглэнэ.' },
+  { q:'BMS гэж юу вэ?', o:['Батарей менежментийн систем', 'Үндсэн хүчдэлийн эх үүсвэр', 'Хамгийн их MPPT', 'Нэг фазын модуль'], a:0, e:'Battery Management System: цэнэглэлт, хүчдэл, температурыг хянан батарейг хамгаална.' },
+  { q:'LFP батарейг 0°C-ээс доош температурт цэнэглэвэл яах вэ?', o:['BMS цэнэглэлтийг хориглодог', 'Хэвийн цэнэглэгдэнэ', 'Илүү хурдан цэнэглэгдэнэ', 'Үр ашиг өснө'], a:0, e:'Хүйтэнд литийн батарейг цэнэглэх нь гэмтээдэг тул BMS цэнэглэлтийг хаадаг.' },
+  { q:'IP65 хамгаалалтын зэрэг юу гэсэн үг вэ?', o:['Тоос нэвтрэхгүй, усны тийрэлтээс хамгаална', 'Усанд шумбаж болно', 'Хамгаалалтгүй', 'Зөвхөн тоосноос хамгаална'], a:0, e:'IP65: тоос бүрэн нэвтрэхгүй, дурын чиглэлээс шүрших усны тийрэлтэнд тэсвэртэй.' },
+  { q:'MNS-ийн дагуу давтамжийн хэлбэлзлийн хязгаарын зөвшөөрөгдөх утга хэд вэ?', o:['±0.4 Гц', '±5 Гц', '±2 Гц', '±0.01 Гц'], a:0, e:'Хэвийн ±0.2 Гц, хязгаарын ±0.4 Гц.' },
+  { q:'Температур буурахад нарны хавтангийн Voc яах вэ?', o:['Өснө', 'Буурна', 'Өөрчлөгдөхгүй', 'Тэг болно'], a:0, e:'Хавтангийн хүчдэл сөрөг температурын коэффициенттэй тул хүйтэнд өснө.' },
+  { q:'Инвертерийн АҮК өндөр байвал юу өгөх вэ?', o:['Дулаан бага ялгарч, илүү энерги үйлдвэрлэнэ', 'Илүү их дулаан ялгарна', 'Батарей хурдан дуусна', 'Үнэ буурна'], a:0, e:'Өндөр АҮК алдагдал багатай, дулаан бага, насжилт урт.' },
+  { q:'THD юуг илэрхийлэх вэ?', o:['Нийт гармоник гажуудал', 'Дулааны алдагдлын нийлбэр', 'Хүчдэлийн дээд хязгаар', 'Температурын дэлгэц'], a:0, e:'Total Harmonic Distortion: гаралтын долгионы гажуудал. 0.38 кВ сүлжээнд 8% хүртэл.' },
+  { q:'Anti-islanding хамгаалалт гэж юу вэ?', o:['Сүлжээ тасрахад инвертер унтардаг хамгаалалт', 'Нар жаргахад ажиллах горим', 'Батарей цэнэглэх горим', 'Ачаалал нэмэх горим'], a:0, e:'Сүлжээ тасарсан үед инвертер сүлжээг тэжээхгүйн тулд, засварчны аюулгүй байдлыг хангаж унтардаг.' }
+];
+let QZ = { list:[], ans:0, right:0 };
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function buildQuiz() {
+  QZ = { list:shuffle(QUIZ.map(q => { const idx = shuffle(q.o.map((_, i) => i)); return { q:q.q, e:q.e, o:idx.map(i => q.o[i]), a:idx.indexOf(q.a) }; })), ans:0, right:0 };
+  $('#quizBox').innerHTML = ''; $('#quizScore').textContent = ''; $('#quizEnd').hidden = true;
+  const prog = () => { $('#quizProg').textContent = 'Хариулсан: ' + QZ.ans + ' / ' + QZ.list.length + ' · Зөв: ' + QZ.right; };
+  prog();
+  QZ.list.forEach((q, qi) => {
+    const d = document.createElement('div'); d.className = 'panel qq';
+    d.innerHTML = '<h4>' + (qi + 1) + '. ' + esc(q.q) + '</h4>' + q.o.map((o, i) => '<button class="qo" data-i="' + i + '">' + esc(o) + '</button>').join('') + '<div class="qe" hidden></div>';
+    let answered = false;
+    $$('.qo', d).forEach(b => b.addEventListener('click', () => {
+      if (answered) return; answered = true; QZ.ans++;
+      const i = +b.dataset.i;
+      if (i === q.a) { QZ.right++; b.classList.add('right'); } else { b.classList.add('wrong'); $$('.qo', d)[q.a].classList.add('right'); }
+      const e = $('.qe', d); e.hidden = false; e.textContent = q.e;
+      prog();
+      if (QZ.ans === QZ.list.length) {
+        const pct = Math.round(100 * QZ.right / QZ.list.length);
+        $('#quizScore').textContent = 'Дүн: ' + QZ.right + ' / ' + QZ.list.length + ' (' + pct + '%) — ' + (pct >= 90 ? 'маш сайн!' : pct >= 70 ? 'сайн. Алдсан хэсгээ лабораториор давтаарай.' : 'онолын хэсэг, лабораториудыг дахин үзээрэй.');
+        $('#quizEnd').hidden = false; $('#quizEnd').scrollIntoView({ behavior:'smooth', block:'center' });
+      }
+    }));
+    $('#quizBox').appendChild(d);
+  });
+}
+
+/* ---------- Эхлүүлэх ---------- */
+function init() {
+  buildControls(); buildReads(); refreshControls();
+  buildDcac(); renderDcac(); buildSelect(); renderSelect(); buildTheory(); buildQuiz(); initBench(); setPlaying(false);
+  $('#btnPlay').addEventListener('click', () => setPlaying(!playing));
+  $('#btnReset').addEventListener('click', () => { restart(C.startH); renderAll(); });
+  $('#btnClear').addEventListener('click', () => { S.latch = null; refreshNow(); });
+  $$('#speedSeg button').forEach(b => b.addEventListener('click', () => {
+    speed = +b.dataset.v; $$('#speedSeg button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+  }));
+  $('#tSlider').addEventListener('input', e => { S.t = +e.target.value; acc = 0; if (!playing) step(S, C, 0); renderAll(); });
+  $('#btnCmp').addEventListener('click', runCompare);
+  const rq = () => { buildQuiz(); $('#v-quiz').scrollIntoView({ behavior:'smooth', block:'start' }); };
+  $('#btnQuizRestart').addEventListener('click', rq); $('#btnQuizRestart2').addEventListener('click', rq);
+  $('#themeBtn').addEventListener('click', () => {
+    const r = document.documentElement, dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    r.dataset.theme = dark ? 'light' : 'dark'; renderDcac(); renderAll();
+  });
+  $('#wd').addEventListener('click', e => { const sw = e.target.closest('[data-sw]'); if (!sw || !WDC.st) return; const c = WDC.st.comps.find(x => x.id === sw.dataset.sw); if (!c) return; c.on = !c.on; WDC.sig = ''; if (BENCH.key && WDC.st === BENCH) renderBench(); syncFromWiring(); refreshNow(); });
+  restart(C.startH); runCompare(); renderAll();
+  requestAnimationFrame(frame);
+}
+
+/* ===================== ЧИГЛҮҮЛЭГЧ, ПРОГРЕСС, ЛАБОРАТОРИ ===================== */
+const PKEY = 'invlab-progress-v1';
+let PROG = { wiring:false, labs:{}, open:false };
+let CURV = 'home', SIMCFG = null, CFGOWNER = 'sim';
+function loadProg() { try { const o = JSON.parse(localStorage.getItem(PKEY) || 'null'); if (o) PROG = Object.assign(PROG, o); } catch (e) {} }
+function saveProg() { try { localStorage.setItem(PKEY, JSON.stringify(PROG)); } catch (e) {} }
+let toastT = null;
+function toast(t) { const e = $('#toast'); e.textContent = t; e.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => e.classList.remove('on'), 3600); }
+
+const WIRING_REQ = { kind:'hybrid', loads:['fridge', 'lights'], minPV:4, parallel:2 };
+const NAV = [['home', 'Нүүр'], ['wiring', '1 Холболт'], ['sim', '2 Симулятор'], ['labs', '3 Лаборатори'], ['compare', 'Харьцуулалт'], ['dcac', 'DC/AC'], ['select', 'Сонголт'], ['theory', 'Онол'], ['quiz', 'Тест']];
+const GATED = ['sim', 'labs', 'lab'];
+const unlocked = () => PROG.wiring || PROG.open;
+const doneLabs = () => Object.keys(PROG.labs).filter(k => PROG.labs[k]).length;
+const labUnlocked = n => PROG.open || n === 1 || !!PROG.labs[n - 1];
+
+function go(v, arg) { const h = '#/' + v + (arg ? '/' + arg : ''); if (location.hash === h) route(); else location.hash = h; }
+
+/* ---------- Лабораторийн өгөгдөл ---------- */
+const hasAl = (S, c) => S.alerts.some(a => a.code === c);
+const LABS = [
+  { id:1, title:'SBU горим: нарлаг өдөр', tag:'Гаралтын тэжээлийн дараалал', start:6,
+    goal:'Output source priority-г SBU (Нар → Батарей → Сүлжээ) болгож, нар ба батарей ачааллыг хэрхэн тэжээхийг ажиглана.',
+    wireText:'Хосолмол систем угсар: нарны хавтан, батарей, сүлжээ, хөргөгч, гэрэлтүүлэг. PV болон батарей бүрийн өмнө DC автомат, сүлжээ болон ачааллын талд AC автомат тавина.',
+    wire:{ kind:'hybrid', loads:['fridge', 'lights'], minPV:2 }, base:{ cloud:5, soc0:50 },
+    phases:[{ title:'SBU горимыг тохируулах', text:'Инвертер одоо USB горимд байна. SBU болгож тохируулаад симуляцийг эхлүүл.', init:{ mode:'USB' },
+      set:[{ k:'mode', v:'SBU', label:'Гаралтын тэжээлийн дараалал = SBU' }],
+      watch:[{ t:'Нар ачааллыг шууд тэжээж байна', f:(S, f) => f.pvLoad > 50 }, { t:'Илүүдэл нар батарейг цэнэглэж байна', f:(S, f) => f.pToBat > 50 }, { t:'Нар жаргасны дараа батарей ачааллыг тэжээж байна', f:(S, f) => f.g === 0 && f.h > 12 && f.batAC > 30 }],
+      hint:'Хурдыг «1 цаг/с» болговол өдөр 24 секундэд өнгөрнө. Графикаас батарейн цэнэг өдөртөө өсч, шөнөдөө буурахыг хар.' }],
+    q:[{ q:'SBU горимд нар жаргасны дараа ачааллыг хэн тэжээв?', o:['Сүлжээ', 'Батарей', 'Нар', 'Генератор'], a:1, e:'SBU: нар → батарей → сүлжээ. Нар байхгүй бол батарей, батарей хүчдэл нь шилжих хэмжээнээс буурсны дараа л сүлжээ.' }] },
+  { id:2, title:'SUB ба USB: сүлжээний хэрэглээ', tag:'Гаралтын тэжээлийн дараалал', start:6,
+    goal:'SUB (Нар → Сүлжээ → Батарей) ба USB (Сүлжээ → Нар → Батарей) горимыг харьцуулж, сүлжээнээс авах энергийн ялгааг ажиглана.',
+    wireText:'Хосолмол систем угсар: нарны хавтан, батарей, сүлжээ, хөргөгч, гэрэлтүүлэг, цахилгаан данх.',
+    wire:{ kind:'hybrid', loads:['fridge', 'lights', 'kettle'], minPV:2 }, base:{ cloud:10, soc0:60 },
+    phases:[
+      { title:'SUB горим', text:'SUB горимд нар ачааллыг тэжээж, дутуу хэсгийг сүлжээ нөхнө. Батарей зөвхөн сүлжээ тасрахад ажиллана.', init:{ mode:'SBU' },
+        set:[{ k:'mode', v:'SUB', label:'Гаралтын тэжээлийн дараалал = SUB' }],
+        watch:[{ t:'Нар ачааллыг, дутууг сүлжээ нөхөж байна (өглөө данх асах үед)', f:(S, f) => f.pvLoad > 50 && f.gridLoad > 50 }, { t:'Илүүдэл нар батарейг цэнэглэж байна', f:(S, f) => f.pToBat > 50 }, { t:'Орой сүлжээ байхад батарей ачаалалд оролцохгүй', f:(S, f) => f.h > 19 && f.gridLoad > 50 && f.batAC < 1 }],
+        hint:'Орой гэрэл асахад ачааллыг сүлжээ тэжээж, батарей бүрэн цэнэгтэй хэвээр үлдэнэ.' },
+      { title:'USB горим', text:'USB горимд сүлжээ гол эх үүсвэр. Нар зөвхөн батарейг цэнэглэнэ.',
+        set:[{ k:'mode', v:'USB', label:'Гаралтын тэжээлийн дараалал = USB' }],
+        watch:[{ t:'Нар байхад ч ачааллыг сүлжээ тэжээж байна', f:(S, f) => f.g > 0.3 && f.gridLoad > 50 && f.pvLoad < 1 }, { t:'Нар батарейг цэнэглэж байна', f:(S, f) => f.pToBat > 50 }],
+        hint:'Өдөр нарны чадал их байхад ч ачаалал сүлжээнээс авч байгааг энергийн урсгалын диаграмаас хар.' }],
+    q:[{ q:'Хэрэглэгч сүлжээнээс хамгийн их энерги авах горим аль нь вэ?', o:['SBU', 'SUB', 'USB', 'Бүгд ижил'], a:2, e:'USB-д ачааллыг сүлжээ тэжээж, нар зөвхөн батарейг цэнэглэдэг тул сүлжээнээс авалт хамгийн их.' },
+       { q:'SUB горимд батарейг хэзээ ашиглах вэ?', o:['Нар жаргасан бүх үед', 'Зөвхөн сүлжээ тасарсан үед', 'Үргэлж', 'Хэзээ ч үгүй'], a:1, e:'SUB-д дутууг сүлжээ нөхөх тул батарей зөвхөн сүлжээ тасарсан үед ашиглагдана.' }] },
+  { id:3, title:'Сүлжээний тасралт: батарейтай ба батарейгүй', tag:'Системийн төрөл', start:16.5,
+    goal:'Сүлжээ тасрахад хосолмол систем батарейгаар үргэлжлэн ажиллаж, сүлжээтэй зэрэгцээ систем унтардгийг харьцуулна.',
+    wireText:'Хосолмол систем угсар: нарны хавтан, батарей, сүлжээ, хөргөгч, гэрэлтүүлэг.',
+    wire:{ kind:'hybrid', loads:['fridge', 'lights'], minPV:2 }, base:{ gridMode:'sched', outFrom:19, outTo:23, soc0:80, cloud:10 },
+    phases:[
+      { title:'Батарейтай хосолмол систем', text:'19:00–23:00 сүлжээ тасарна. Горимыг SUB болгож батарей хэзээ ажиллахыг хар.', init:{ mode:'SBU' },
+        set:[{ k:'mode', v:'SUB', label:'Гаралтын тэжээлийн дараалал = SUB' }],
+        watch:[{ t:'Сүлжээ тасарсан үед батарей ачааллыг тэжээж байна', f:(S, f) => !f.gridAvail && f.batAC > 30 }],
+        hint:'Сүлжээний блок диаграмд «тасарсан» гэж харагдана.' },
+      { title:'Батарейгүй (сүлжээтэй зэрэгцээ) систем', text:'Системийн төрлийг сүлжээтэй зэрэгцээ болгож (батарей байхгүй) тасралтад яах вэ гэдгийг хар.',
+        set:[{ k:'sysType', v:'ongrid', label:'Системийн төрөл = Сүлжээтэй зэрэгцээ' }],
+        watch:[{ t:'Сүлжээ тасарахад систем унтарлаа (anti-islanding)', f:(S) => hasAl(S, 'ANTIISLAND') }],
+        hint:'Тасралтын үеэр ачаалал бүрэн тэжээлгүй үлдэнэ.' }],
+    q:[{ q:'Сүлжээтэй зэрэгцээ инвертер сүлжээ тасрахад яагаад унтрах вэ?', o:['Батарей байхгүй учраас', 'Аюулгүй байдлын хамгаалалт (anti-islanding)', 'Нар жаргасан учраас', 'Ачаалал их учраас'], a:1, e:'Сүлжээ тасарсан үед инвертер өөрөө сүлжээг тэжээж болохгүй тул засварчинг хамгаалахын тулд унтардаг.' }] },
+  { id:4, title:'Батарейн cut-off хүчдэл ба Low Voltage', tag:'Алдаа: Low Voltage', fault:'lowv', start:17,
+    goal:'Cut-off хүчдэлийг тохируулж, жижиг батарей нар жаргасны дараа дуусахад инвертер хэрхэн унтарч байгааг ажиглаад, засна.',
+    wireText:'Сүлжээнээс тусдаа систем угсар: нарны хавтан, батарей, хөргөгч, гэрэлтүүлэг. Сүлжээ байрлуулахгүй.',
+    wire:{ kind:'offgrid', loads:['fridge', 'lights'], minPV:2 }, base:{ ah:50, soc0:35, cloud:70, extra:600 },
+    phases:[
+      { title:'Алдааг үүсгэх', text:'Cut-off хүчдэлийг 48 В системд зөвлөсөн 45 В болго. Жижиг (50 Ач) батарей орой ачааллыг үргэлжлүүлж чадахгүй.', init:{ vcut:41 },
+        set:[{ k:'vcut', v:45, label:'Cut-off хүчдэл = 45.0 В' }],
+        watch:[{ t:'Low Voltage алдаа гарч инвертер унтарлаа', f:(S) => hasAl(S, 'LOWV') }],
+        hint:'Батарейн «Хүчдэлийн тохиргоо» хэсгээс cut-off хүчдэлийг ол. Графикт хүчдэл тасархай улаан шугамд хүрнэ.' },
+      { title:'Алдааг засах', text:'Батарейн багтаамжийг нэмж, шөнийн ачааллыг дуустал тэжээгдэхээр болго. «Алдаа арилгах» товчийг дарж болно.',
+        set:[{ k:'ah', v:300, label:'Багтаамж = 300 Ач' }],
+        watch:[{ t:'21:00-аас хойш алдаагүй, батарейгаар ажиллаж байна', f:(S, f) => f.h >= 21 && f.h < 23.9 && !S.latch && f.batAC > 30 }],
+        hint:'Тохиргоог хийсний дараа «Шинээр эхлүүлэх»-ийг дарж дахин ажиллуул.' }],
+    q:[{ q:'Low Voltage алдаа гарсны шалтгаан юу вэ?', o:['Батарейн хүчдэл cut-off-оос буурсан', 'Нарны хавтан хэт халсан', 'Сүлжээний хүчдэл өндөр', 'Автомат салсан'], a:0, e:'Батарей дуусч ачаалалтай үеийн хүчдэл cut-off хязгаараас буухад инвертер батарейг хамгаалж унтардаг.' }] },
+  { id:5, title:'Ачаалалтай үеийн хүчдэлийн уналт', tag:'Батарейн хүчдэл', start:20,
+    goal:'Батарейн дотоод эсэргүүцлээс болж ачаалалтай үед хүчдэл буурч, цэнэг үлдсэн ч хамгаалалт ажиллаж болохыг хүчлийн болон LFP батарейгаар харьцуулна.',
+    wireText:'Сүлжээнээс тусдаа систем угсар: нарны хавтан, батарей, хөргөгч, гэрэлтүүлэг.',
+    wire:{ kind:'offgrid', loads:['fridge', 'lights'], minPV:2 }, base:{ ah:100, soc0:25, cloud:80, extra:1700 },
+    phases:[
+      { title:'Хүчлийн (lead-acid) батарей', text:'Батарейн төрлийг хүчлийн болго. Их ачаалалд хүчдэл «хоосон» утгаас хэр их буурахыг ажигла.', init:{ chem:'lfp' },
+        set:[{ k:'chem', v:'la', label:'Батарейн төрөл = Хүчлийн (lead-acid)' }],
+        watch:[{ t:'Ачаалалтай хүчдэл хоосон хүчдэлээс 2 В-оос илүү буурсан', f:(S, f) => f.ib > 20 && f.ocv - f.vt > 2 }, { t:'Цэнэг үлдсэн ч Low Voltage алдаа гарлаа', f:(S, f) => hasAl(S, 'LOWV') && f.soc > 0.05 }],
+        hint:'Батарейн «SOC» үзүүлэлтийн хажуу дахь «хоосон» хүчдэл ба ачаалалтай хүчдлийг харьцуул.' },
+      { title:'LFP батарей', text:'Төрлийг LiFePO₄ болго. Дотоод эсэргүүцэл бага тул уналт бага. «Алдаа арилгах» дарж дахин эхлүүл.',
+        set:[{ k:'chem', v:'lfp', label:'Батарейн төрөл = LiFePO₄ (LFP)' }],
+        watch:[{ t:'Ижил ачаалалд алдаагүй ажиллаж байна', f:(S, f) => f.ib > 40 && !S.latch && f.ocv - f.vt < 2.5 }],
+        hint:'LFP-д хүчдэлийн уналт бага байгаа нь график дээр харагдана.' }],
+    q:[{ q:'Яагаад цэнэг үлдсэн байхад инвертер унтарч болох вэ?', o:['Ачаалалтай үед хүчдэл дотоод эсэргүүцэлд буурч cut-off-оос доош орно', 'Нарны хавтан муу', 'Сүлжээ тасарсан', 'Автомат салсан'], a:0, e:'Гүйдэл их байх тусам I·R уналт их. Терминалын хүчдэл cut-off-оос буухад хамгаалалт ажиллана.' }] },
+  { id:6, title:'Overload: хэт ачаалал', tag:'Алдаа: Overload', fault:'over', start:12,
+    goal:'Инвертерийн чадлаас их ачаалал холбоход гарах алдааг гаргаж, илүү өндөр чадлын инвертер сонгож засна.',
+    wireText:'Сүлжээнээс тусдаа систем угсар: нарны хавтан, батарей, хөргөгч, гэрэлтүүлэг, цахилгаан данх, халаагуур, усны шахуурга.',
+    wire:{ kind:'offgrid', loads:['fridge', 'lights', 'kettle', 'heater', 'pump'], minPV:2 }, base:{ sched:false, cloud:0, soc0:80 },
+    phases:[
+      { title:'Алдааг үүсгэх', text:'3.5 кВт-ын Growatt инвертер сонго. Нийт ачаалал 4.3 кВт орчим тул хэт ачаалал гарна.', init:{ inv:0 },
+        set:[{ k:'inv', v:2, label:'Инвертер = Growatt SPF 3500 ES' }],
+        watch:[{ t:'Overload алдаа гарч инвертер ачааллыг салгалаа', f:(S) => hasAl(S, 'OVERLOAD') }],
+        hint:'Ачааллын нийлбэрийг «Ачаалал ба сүлжээ» табаас хар.' },
+      { title:'Алдааг засах', text:'5.5 кВт-ын Bluesun инвертер сонгоод «Алдаа арилгах» товчийг дар.',
+        set:[{ k:'inv', v:0, label:'Инвертер = Bluesun BSM-5500BLV-48DA' }],
+        watch:[{ t:'4 кВт-аас илүү ачааллыг алдаагүй тэжээж байна', f:(S, f) => f.served > 4000 && !S.latch }],
+        hint:'Алдаа түгжигдсэн тул «Алдаа арилгах» дарахгүй бол инвертер асахгүй.' }],
+    q:[{ q:'Overload алдааны шийдэл аль нь вэ?', o:['Ачааллыг бууруулах эсвэл илүү чадалтай инвертер сонгох', 'Батарейн хүчдэлийг нэмэх', 'Хавтангийн тоог цөөлөх', 'Сэнсийг унтраах'], a:0, e:'Ачаалал инвертерийн нэрлэсэн чадлаас хэтрэхэд инвертер хална. Ачааллыг багасгах эсвэл чадлыг нэмнэ.' }] },
+  { id:7, title:'Сүүдэр: 1 MPPT ба 2 MPPT', tag:'MPPT', start:10,
+    goal:'Нэг хавтан сүүдэртэхэд 1 MPPT-тэй инвертерт бүх хавтангийн чадал буурдаг, 2 MPPT-тэйд тэгдэггүйг харьцуулна.',
+    wireText:'Хосолмол систем угсар: нарны хавтан, батарей, сүлжээ, хөргөгч, гэрэлтүүлэг.',
+    wire:{ kind:'hybrid', loads:['fridge', 'lights'], minPV:4 }, base:{ cloud:0, soc0:50 },
+    phases:[
+      { title:'1 MPPT-тэй инвертер', text:'Growatt (1 MPPT) сонгоод хавтангийн нэг бүлгийг 60% сүүдэрлэ.', init:{ inv:3, shading:0 },
+        set:[{ k:'inv', v:2, label:'Инвертер = Growatt SPF 3500 ES (1 MPPT)' }, { k:'shading', v:60, label:'Сүүдэр = 60 %' }],
+        watch:[{ t:'1 MPPT-д сүүдрийн алдагдал бүх массивт нөлөөлж байна', f:(S) => hasAl(S, 'SHADE') }, { t:'Сүүдрээс болж 300 Вт-аас их чадал алдаж байна', f:(S, f) => f.shadeLoss > 300 }],
+        hint:'Нарны чадал «боломжит» утгаас хэр доогуур байгааг диаграмд хар.' },
+      { title:'2 MPPT-тэй инвертер', text:'Huawei (2 MPPT) инвертер сонго. Сүүдэр хэвээр.',
+        set:[{ k:'inv', v:3, label:'Инвертер = Huawei SUN2000-3KTL-L1 (2 MPPT)' }],
+        watch:[{ t:'Сүүдэртсэн ч алдагдал хагас хүртэл буурлаа (анхааруулга алга)', f:(S, f) => f.pvNom > 800 && f.shadeLoss > 0 && !hasAl(S, 'SHADE') }],
+        hint:'Сүүдрийн алдагдлын хэмжээг энергийн тооцоо хүснэгтээс ч харж болно.' }],
+    q:[{ q:'Нэг хавтан сүүдэртэхэд 1 MPPT-тэй инвертерт юу болох вэ?', o:['Зөвхөн сүүдэртсэн хавтан чадлаа алдана', 'Бүх хавтангийн чадал дагаж буурна', 'Инвертер хэт халдаг', 'Өөрчлөлтгүй'], a:1, e:'1 MPPT нэг оролттой тул бүх хавтан нэг нөхцөлд ажиллах ёстой. 2 MPPT бүлэг бүрийг тусад нь удирдана.' }] },
+  { id:8, title:'Over Voltage: хүйтэн өглөөний PV хүчдэл', tag:'Алдаа: Over Voltage', fault:'ovv', start:8.5,
+    goal:'Хүйтэнд нарны хавтангийн хүчдэл (Voc) өсч, инвертерийн оролтын хязгаараас хэтэрч болохыг харж, цуваа холболтыг өөрчилж (хавтангийн тоог цөөлж) засна.',
+    wireText:'Хосолмол систем угсар. Нарны 3 хавтанг нэг string болгон ЦУВАА холбо (Voc ≈ 164 В). Мөн батарей, сүлжээ, хөргөгч нэм. Инвертерийн PV оролтын дээд хүчдэл 185 В байна.',
+    wire:{ kind:'hybrid', loads:['fridge'], minPV:3, series:3 }, base:{ season:'winter', cloud:0, soc0:50, vpvmax:185 },
+    phases:[
+      { title:'Алдааг үүсгэх', text:'Өвлийн −25°C өглөө болго. 3 цуваа хавтангийн Voc хүйтэнд өсөж 185 В-оос хэтэрнэ.', init:{ tamb:-5 },
+        set:[{ k:'tamb', v:-25, label:'Орчны температур = −25 °C' }],
+        watch:[{ t:'Over Voltage алдаа гарч PV оролт салав', f:(S) => hasAl(S, 'OVV') }],
+        hint:'«Хавтангийн хүчдэл Voc» үзүүлэлтийн шугам улаан тэмдэглэгээнээс хэтэрнэ. Нар гарч хавтан дулаарахад алдаа өөрөө арилна.' },
+      { title:'Алдааг засах: холболтыг өөрчлөх', text:'Хүйтэнд ч Voc хязгаарын дотор байхаар string бүрийн хавтангийн тоог 2 болго.',
+        rewire:{ series:2 }, rewireText:'Холболтыг өөрчил: string-ийн хавтангийн тоог 3-аас 2 болго. Нэг хавтанг салгаж (утсыг устгаж) үлдсэн хоёрыг цуваа холбоно. Дараа нь «Тохиргоо руу».',
+        set:[],
+        watch:[{ t:'Хүйтэн өглөө ч Voc хязгаарын дотор, PV ажиллаж байна', f:(S, f) => f.g > 0.03 && f.voc <= C.vpvmax && f.pvUsedDC > 30 }],
+        hint:'Цуваа хавтангийн тоо цөөрөхөд String-ийн хүчдэл буурна. Гэхдээ MPPT-ийн доод хүчдэл (80 В) -ээс бага болгож болохгүй.' }],
+    q:[{ q:'Over Voltage алдаа яагаад өвлийн өглөө илүү гардаг вэ?', o:['Хүйтэнд хавтангийн хүчдэл өсдөг', 'Батарей хэт цэнэглэгддэг', 'Сүлжээний хүчдэл нэмэгддэг', 'Инвертер хөлддөг'], a:0, e:'Температур буурахад хавтангийн Voc өсдөг. Цуваа холболтын нийлбэр хүчдэл инвертерийн хязгаараас хэтэрч болно.' }] },
+  { id:9, title:'Over Temperature: хэт халалт', tag:'Алдаа: Over Temperature', fault:'temp', start:11,
+    goal:'Сэнс ажиллахгүй, гадна халуун орчинд инвертер халж, чадал буурч, унтардгийг харж, байршил, хөргөлтийг засаж шийднэ.',
+    wireText:'Хосолмол систем угсар: нарны хавтан, батарей, сүлжээ, хөргөгч, гэрэлтүүлэг, халаагуур.',
+    wire:{ kind:'hybrid', loads:['fridge', 'lights', 'heater'], minPV:2 }, base:{ tamb:36, season:'summer', cloud:0, sched:false, soc0:60 },
+    phases:[
+      { title:'Алдааг үүсгэх', text:'Сэнсийг ажиллахгүй болгож, инвертерийг гадаа (шууд нарны дор) байрлуул.', init:{ fanOK:true, indoor:true },
+        set:[{ k:'fanOK', v:false, label:'Сэнс ажиллаж байна = унтраах' }, { k:'indoor', v:false, label:'Дотор байрлуулсан = унтраах (гадаа)' }],
+        watch:[{ t:'Халалтаас чадал буурч байна', f:(S) => hasAl(S, 'DERATE') }, { t:'Over Temperature алдаа гарч инвертер унтарлаа', f:(S) => hasAl(S, 'OVERTEMP') }],
+        hint:'Инвертерийн температур диаграмын доод мөрөнд харагдана.' },
+      { title:'Алдааг засах', text:'Сэнсийг асааж, инвертерийг дотор (сэрүүн) байрлуул.',
+        set:[{ k:'fanOK', v:true, label:'Сэнс ажиллаж байна = асаах' }, { k:'indoor', v:true, label:'Дотор байрлуулсан = асаах' }],
+        watch:[{ t:'Температур 40°C-аас доош, ачааллыг тэжээж байна', f:(S, f) => f.tinv < 40 && f.served > 1000 }],
+        hint:'Тохиргооны дараа «Шинээр эхлүүлэх» дар.' }],
+    q:[{ q:'Over Temperature алдаанаас сэргийлэх хамгийн зөв арга аль нь вэ?', o:['Сэрүүн, агааржуулалттай газар байрлуулж, сэнсийг шалгах', 'Батарей нэмэх', 'Хавтан нэмэх', 'Cut-off хүчдэл өсгөх'], a:0, e:'Хөргөлт муу, халуун орчин инвертерийн алдагдлын дулааныг гаргаж чадахгүй. Байршил ба сэнс чухал.' }] },
+  { id:10, title:'Grid Fault: сүлжээний чанар', tag:'Алдаа: Grid Fault', fault:'gridf', start:17.5,
+    goal:'Сүлжээний хүчдэл MNS-ийн зөвшөөрөгдөх ±10%-иас хэтрэхэд инвертер сүлжээнээс салж, батарей руу шилжихийг ажиглана.',
+    wireText:'Хосолмол систем угсар: нарны хавтан, батарей, сүлжээ, хөргөгч, гэрэлтүүлэг.',
+    wire:{ kind:'hybrid', loads:['fridge', 'lights'], minPV:2 }, base:{ cloud:10, soc0:70, mode:'SUB' },
+    phases:[
+      { title:'Хүчдэл хэтрэх', text:'Сүлжээний хүчдэлийг 262 В болго (зөвшөөрөгдөх дээд хязгаар 253 В).', init:{ gridV:230 },
+        set:[{ k:'gridV', v:262, label:'Сүлжээний хүчдэл = 262 В' }],
+        watch:[{ t:'Grid Fault алдаа гарлаа', f:(S) => hasAl(S, 'GRIDFAULT') }, { t:'Систем сүлжээнээс салж батарей ачааллыг авлаа', f:(S, f) => !f.gridOK && f.batAC > 30 }],
+        hint:'Нар жаргасны дараа (18:00-аас) батарейн ажиллагааг хар.' },
+      { title:'Хэвийн болгох', text:'Хүчдэлийг 230 В болго (тогтворжуулагч ашигласан гэж үз).',
+        set:[{ k:'gridV', v:230, label:'Сүлжээний хүчдэл = 230 В' }],
+        watch:[{ t:'Инвертер сүлжээнд дахин холбогдож, ачааллыг сүлжээ тэжээж байна', f:(S, f) => f.gridOK && f.gridLoad > 30 }],
+        hint:'218.5–241.5 В (±5%) нь хэвийн, 207–253 В (±10%) хязгаарын мужид тооцогдоно.' }],
+    q:[{ q:'MNS 1778 дагуу хүчдэлийн хэлбэлзлийн хязгаарын зөвшөөрөгдөх утга хэд вэ?', o:['±1%', '±5%', '±10%', '±20%'], a:2, e:'Хэвийн зөвшөөрөгдөх ±5%, хязгаарын зөвшөөрөгдөх ±10%. Давтамж ±0.2 / ±0.4 Гц.' }] },
+  { id:11, title:'Peak-shaving: оргил цагийн ачаалал', tag:'Батарейн стратеги', start:23,
+    goal:'Peak-shaving горимд шөнө батарейг сүлжээнээс урьдчилж цэнэглэж, оргил цагт сүлжээнээс авах чадлыг хязгаарладгийг ажиглана.',
+    wireText:'Хосолмол систем угсар: нарны хавтан, батарей, сүлжээ, хөргөгч, гэрэлтүүлэг, данх, халаагуур.',
+    wire:{ kind:'hybrid', loads:['fridge', 'lights', 'kettle', 'heater'], minPV:2 }, base:{ soc0:30, cloud:10 },
+    phases:[{ title:'Peak-shaving тохируулах', text:'Горимыг Peak-shaving болгож, оргил цагт сүлжээнээс авах дээд чадлыг 800 Вт болго. Хурдыг 1–2 цаг/с болго.', init:{ mode:'SBU', peakThr:1500 },
+      set:[{ k:'mode', v:'PEAK', label:'Горим = Peak-shaving' }, { k:'peakThr', v:800, label:'Оргил цагт авах дээд чадал = 800 Вт' }],
+      watch:[{ t:'Шөнө (23:00–06:00) сүлжээнээс батарейг урьдчилж цэнэглэж байна', f:(S, f) => f.gridChgDC > 50 }, { t:'Оргил цагт (17:00–22:00) сүлжээнээс авалт 800 Вт-аас хэтрэхгүй', f:(S, f) => f.h >= 17 && f.h < 22 && f.L > C.peakThr + 200 && f.gridLoad <= C.peakThr + 5 }],
+      hint:'Энэ туршилт бүтэн өдөр орчим үргэлжилнэ. Хурдыг нэмж болно. Оргил цагт дутууг батарей нөхнө.' }],
+    q:[{ q:'Peak-shaving-ийн гол зорилго юу вэ?', o:['Оргил цагт сүлжээнээс авах чадлыг бууруулах', 'Нарны хавтан нэмэх', 'Батарейг хурдан эвдэх', 'Инвертерийг унтраах'], a:0, e:'Оргил ачааллыг батарейгаар хамарч, сүлжээнээс авах дээд чадлыг хязгаарлана. Шөнө урьдчилж цэнэглэнэ.' }] }
+];
+
+/* ---------- Тусламж ---------- */
+const sameV = (a, b) => typeof b === 'number' ? Math.abs(+a - b) < 0.06 : a === b;
+function patchCfg(p) {
+  Object.assign(C, p);
+  if (p.chem) { const d = CHEM_DEF[C.chem], r = C.vn / 48; VKEYS.forEach(x => { if (!(x in p)) C[x] = +(d[x] * r).toFixed(1); }); }
+  refreshControls();
+}
+function clearTargets() { $$('.f.target').forEach(e => e.classList.remove('target')); }
+function place(blockId, slot) { const b = $('#' + blockId), s = $(slot); if (b.parentNode !== s) s.appendChild(b); }
+
+/* ---------- Чиглүүлэгч ---------- */
+function route() {
+  let h = location.hash.replace(/^#\/?/, '') || 'home';
+  let [v, arg] = h.split('/');
+  if (!$('#v-' + v)) v = 'home';
+  if (GATED.includes(v) && !unlocked()) { v = 'wiring'; history.replaceState(null, '', '#/wiring'); toast('Эхлээд 1-р алхам: холболтоо зөв угсарна уу.'); }
+  if (v === 'lab') {
+    const n = +arg;
+    if (!LABS.find(l => l.id === n)) v = 'labs';
+    else if (!labUnlocked(n)) { v = 'labs'; history.replaceState(null, '', '#/labs'); toast('Өмнөх лабораторийг дуусгасны дараа нээгдэнэ.'); }
+  }
+  clearTargets();
+  const prev = CURV; CURV = v;
+  $$('.view').forEach(x => x.classList.toggle('on', x.id === 'v-' + v));
+  $('#benchBlock').classList.remove('lab');
+  if (prev === 'lab' && v !== 'lab') CFGOWNER = 'lab';
+  if (v === 'wiring') {
+    place('benchBlock', '#slotWiring'); benchSwap('main'); BENCH.req = WIRING_REQ; renderBench();
+    $('#wireGate').hidden = true;
+  } else if (v === 'sim') {
+    if (CFGOWNER !== 'sim') {
+      const c = SIMCFG ? JSON.parse(SIMCFG) : defaultCfg(); replaceCfg(c); refreshControls(); restart(c.startH || 6); CFGOWNER = 'sim';
+    }
+    ['simBlock', 'ctlBlock', 'chartsBlock'].forEach(b => place(b, '#slotSim'));
+    if (BSTATE.main && BSTATE.main.comps.length) syncFromWiring();
+    $('#simLead').textContent = SIMCFG ? 'Энэ симуляци таны угсарсан схемээр ажиллаж байна. Параметрээ өөрчилж үр дүнг ажигла.' : 'Параметрээ өөрчилж, эрчим хүчний урсгал, батарейн хүчдэл, алдааны хамгаалалт хэрхэн хариу өгөхийг ажигла.';
+  } else if (v === 'lab') {
+    openLab(+arg);
+  } else if (v === 'labs') renderLabList();
+  else if (v === 'home') renderHome();
+  if (v === 'dcac') renderDcac();
+  renderNav();
+  window.scrollTo(0, 0);
+}
+function renderNav() {
+  $('#nav').innerHTML = NAV.map(([k, t]) => {
+    const lock = GATED.includes(k) && !unlocked();
+    return '<a href="#/' + k + '" class="' + (lock ? 'locked' : '') + '"' + ((CURV === k || (CURV === 'lab' && k === 'labs')) ? ' aria-current="page"' : '') + '>' + esc(t) + (lock ? ' 🔒' : '') + '</a>';
+  }).join('');
+}
+function renderHome() {
+  const n = doneLabs();
+  const chip = (c, t) => '<span class="chip ' + c + '">' + t + '</span>';
+  $('#homePath').innerHTML =
+    '<a class="panel pstep" href="#/wiring"><h3>1. Холболт</h3><p>Самбар дээр PV, батарей, автомат, инвертер, сүлжээ, ачааллыг утсаар холбоно.</p>' + (PROG.wiring ? chip('done', 'Дууссан') : chip('open', 'Эхлэх')) + '</a>' +
+    '<a class="panel pstep" href="#/sim"><h3>2. Симулятор</h3><p>Угсарсан схемээрээ 24 цагийн ажиллагааг харж, параметр өөрчилнө.</p>' + (unlocked() ? chip('open', 'Нээлттэй') : chip('lock', 'Түгжээтэй')) + '</a>' +
+    '<a class="panel pstep" href="#/labs"><h3>3. Лабораториуд</h3><p>11 лаборатори: горим, батарей, MPPT, 5 төрлийн алдаа. Тус бүр өөрийн холболттой.</p>' + (unlocked() ? chip(n === LABS.length ? 'done' : 'open', n + ' / ' + LABS.length + ' дууссан') : chip('lock', 'Түгжээтэй')) + '</a>' +
+    '<a class="panel pstep" href="#/compare"><h3>Горим харьцуулалт</h3><p>SBU, SUB, USB, Self, Peak-shaving горимыг 24 цагаар харьцуулна.</p></a>' +
+    '<a class="panel pstep" href="#/dcac"><h3>DC/AC харьцаа</h3><p>Хайчлалтын алдагдал ба оновчтой харьцаа.</p></a>' +
+    '<a class="panel pstep" href="#/select"><h3>Инвертер сонгох</h3><p>8 инвертерийг өөрийн шаардлагаар шүүнэ.</p></a>' +
+    '<a class="panel pstep" href="#/theory"><h3>Онолын товч</h3><p>Хичээлийн слайдын гол агуулга.</p></a>' +
+    '<a class="panel pstep" href="#/quiz"><h3>Тест</h3><p>Мэдлэгээ шалгана.</p></a>';
+}
+
+/* ---------- Холболтын хуудас ---------- */
+function onBench(ev) {
+  if (CURV === 'wiring') {
+    try { localStorage.setItem('invlab-bench-main', JSON.stringify({ comps:BENCH.comps, wires:BENCH.wires, nid:BENCH.nid })); } catch (e) {}
+    const ok = BENCH.reqOK && ev.canApply;
+    $('#wireDone').hidden = !ok;
+    if (BENCH.reqOK && !PROG.wiring) { PROG.wiring = true; saveProg(); renderNav(); toast('Холболт зөв! Симулятор болон лабораториуд нээгдлээ.'); }
+  } else if (CURV === 'lab' && LAB.step === 'wire') {
+    $('#btnLabToRun').disabled = !BENCH.reqOK;
+    if (BENCH.reqOK && !LAB.wireDone) { LAB.wireDone = true; renderStepper(); toast('Холболт зөв!'); }
+  }
+}
+
+/* ---------- Лабораторийн жагсаалт ---------- */
+function renderLabList() {
+  $('#openAll').checked = !!PROG.open;
+  $('#labList').innerHTML = LABS.map(l => {
+    const done = !!PROG.labs[l.id], un = labUnlocked(l.id);
+    return '<div class="panel card' + (l.fault ? ' fault' : '') + '"><div class="tag">Лаборатори ' + l.id + ' · ' + esc(l.tag) + '</div><h3>' + esc(l.title) + '</h3><p style="font-size:14px;color:var(--ink2);margin:0">' + esc(l.goal) + '</p>' +
+      '<div class="actions"><span class="chip ' + (done ? 'done' : un ? 'open' : 'lock') + '">' + (done ? 'Дууссан' : un ? 'Нээлттэй' : 'Түгжээтэй') + '</span><span style="flex:1"></span>' +
+      '<button class="btn small" data-lab="' + l.id + '"' + (un ? '' : ' disabled') + '>' + (done ? 'Дахин хийх' : 'Эхлэх') + '</button></div></div>';
+  }).join('');
+  $$('#labList [data-lab]').forEach(b => b.addEventListener('click', () => go('lab', b.dataset.lab)));
+}
+
+/* ---------- Лабораторийн хуудас ---------- */
+const LAB = { id:0, step:'wire', phase:0, reached:0, wireDone:false, done:[], sig:'', qAnswered:0, qRight:0, rewire:false };
+const labOf = () => LABS.find(l => l.id === LAB.id);
+function stepIndex() { return LAB.step === 'wire' ? 0 : LAB.step === 'run' ? 1 + LAB.phase : 1 + labOf().phases.length; }
+function openLab(n) {
+  const lab = LABS.find(l => l.id === n);
+  if (LAB.id !== n) { Object.assign(LAB, { id:n, step:'wire', phase:0, reached:0, wireDone:false, done:[], sig:'', qAnswered:0, qRight:0, rewire:false }); BSTATE['lab' + n] = null; }
+  $('#labTitle').textContent = 'Лаборатори ' + n + '. ' + lab.title;
+  const f = lab.fault ? FAULT_SLIDE[lab.fault] : null;
+  $('#labIntro').innerHTML = '<div class="panel pad" style="margin-bottom:14px"><p style="margin-bottom:6px"><b>Зорилго.</b> ' + esc(lab.goal) + '</p>' +
+    (f ? '<table class="etable" style="margin-top:6px"><tr><th style="text-align:left">Шалтгаан</th><th style="text-align:left">Нөлөө</th><th style="text-align:left">Шийдэл</th></tr><tr style="vertical-align:top"><td style="text-align:left">' + f.cause.map(esc).join('<br>') + '</td><td style="text-align:left">' + f.effect.map(esc).join('<br>') + '</td><td style="text-align:left">' + f.fix.map(esc).join('<br>') + '</td></tr></table>' : '') + '</div>';
+  buildLabQuiz(lab);
+  showStep(LAB.step);
+}
+function renderStepper() {
+  const lab = labOf(); const items = ['Холболт'].concat(lab.phases.map((p, i) => 'Туршилт ' + (i + 1))).concat(['Асуулт']);
+  const cur = stepIndex();
+  $('#labStepper').innerHTML = items.map((t, i) => '<button data-i="' + i + '" ' + (i === cur ? 'aria-current="step"' : '') + (i < LAB.reached || (i === 0 && LAB.wireDone) ? ' class="done"' : '') + (i > LAB.reached ? ' disabled' : '') + '>' + esc(t) + '</button>').join('');
+  $$('#labStepper button').forEach(b => b.addEventListener('click', () => {
+    const i = +b.dataset.i; if (i === 0) showStep('wire'); else if (i <= lab.phases.length) { LAB.phase = i - 1; startPhase(false); showStep('run'); } else showStep('q');
+  }));
+}
+function showStep(step) {
+  LAB.step = step; clearTargets();
+  const lab = labOf();
+  $('#stWire').hidden = step !== 'wire'; $('#stRun').hidden = step !== 'run'; $('#stQ').hidden = step !== 'q';
+  if (step === 'wire') {
+    place('benchBlock', '#slotLabBench'); $('#benchBlock').classList.add('lab');
+    benchSwap('lab' + lab.id);
+    const rph = lab.phases[LAB.phase];
+    BENCH.req = LAB.rewire && rph.rewire ? Object.assign({}, lab.wire, rph.rewire) : lab.wire;
+    $('#btnLabToRun').textContent = LAB.rewire ? 'Холболт зөв. Туршилт руу →' : 'Холболт зөв. Тохиргоо руу →';
+    $('#labWireTask').innerHTML = '<b>Холболтын даалгавар.</b> ' + esc(LAB.rewire && rph.rewireText ? rph.rewireText : lab.wireText) + ' <button class="btn ghost small" id="btnCopyMain" style="margin-left:8px">Үндсэн схемээс хуулах</button>';
+    $('#btnCopyMain').addEventListener('click', () => {
+      const st = BENCH.key === 'main' ? null : BSTATE.main;
+      if (!st || !st.comps.length) { toast('Үндсэн холболтын хуудсанд схем алга.'); return; }
+      benchPush(); BENCH.comps = JSON.parse(JSON.stringify(st.comps)); BENCH.wires = JSON.parse(JSON.stringify(st.wires)); BENCH.nid = st.nid; renderBench();
+      toast('Үндсэн схемийг хууллаа. Шаардлагад нийцүүлж өөрчил.');
+    });
+    renderBench();
+  } else if (step === 'run') {
+    place('simBlock', '#slotLabSim'); place('ctlBlock', '#slotLabCtl'); place('chartsBlock', '#slotLabCharts');
+    LAB.sig = ''; renderAll();
+  }
+  LAB.reached = Math.max(LAB.reached, stepIndex());
+  renderStepper();
+  if (step === 'q') { LAB.reached = Math.max(LAB.reached, 1 + lab.phases.length); renderStepper(); }
+  window.scrollTo(0, 0);
+}
+
+function labConfig(lab) {
+  const ev = BENCH.ev, d = benchDerive(ev), c = defaultCfg();
+  Object.assign(c, lab.base || {});
+  c.sysType = d.sysType; c.series = d.series; c.strings = d.strings; if (d.bat && !(lab.base && lab.base.ah)) c.ah = d.ah;
+  APPLIANCES.forEach(a => c.apps[a.id].on = d.loads.includes(a.id));
+  c.startH = lab.start; replaceCfg(c); CFGOWNER = 'lab';
+  if (lab.base && lab.base.chem) patchCfg({ chem:lab.base.chem });
+  refreshControls();
+}
+function startPhase(applyInit) {
+  const lab = labOf(), ph = lab.phases[LAB.phase];
+  if (applyInit !== false && ph.init) patchCfg(ph.init);
+  LAB.done = ph.watch.map(() => false); LAB.sig = '';
+  restart(lab.start); S.latch = null; refreshControls();
+  const sp = $('#speedSeg button[data-v="60"]'); if (sp) sp.click();
+  setPlaying(true);
+  const first = ph.set[0], tabName = ctlEls[first.k] && ctlEls[first.k].tab;
+  if (tabName) { const tb = $$('#ctlTabs button').find(b => b.textContent === tabName); if (tb) tb.click(); }
+}
+function labTick() {
+  if (CURV !== 'lab' || LAB.step !== 'run') return;
+  const ph = labOf().phases[LAB.phase];
+  if (!ph.set.every(s => sameV(C[s.k], s.v))) return;
+  ph.watch.forEach((w, i) => { if (!LAB.done[i] && w.f(S, S.flow, C)) LAB.done[i] = true; });
+}
+function labRender() {
+  if (CURV !== 'lab' || LAB.step !== 'run') return;
+  const lab = labOf(), ph = lab.phases[LAB.phase];
+  const setOK = ph.set.map(s => sameV(C[s.k], s.v));
+  ph.set.forEach((s, i) => { const el = ctlEls[s.k] && ctlEls[s.k].inp.closest('.f'); if (el) el.classList.toggle('target', !setOK[i]); });
+  const sig = LAB.phase + '|' + setOK.join() + '|' + LAB.done.join();
+  if (sig === LAB.sig) return; LAB.sig = sig;
+  const allSet = setOK.every(Boolean), allDone = LAB.done.every(Boolean), last = LAB.phase === lab.phases.length - 1;
+  $('#labPhaseCard').innerHTML = '<div class="lab-grid ph"><div><h3>Туршилт ' + (LAB.phase + 1) + ' / ' + lab.phases.length + ': ' + esc(ph.title) + '</h3><p>' + esc(ph.text) + '</p>' +
+    (ph.set.length ? '<h4>1. Тохиргоо хий</h4>' : '<h4>Холболт өөрчилсөн, симуляци ажиллуулна</h4>') + '<ul class="chk-list">' + ph.set.map((s, i) => '<li class="' + (setOK[i] ? 'ok' : '') + '">' + esc(s.label) + ' <span class="tab">(' + esc((ctlEls[s.k] && ctlEls[s.k].tab) || '') + ' таб)</span></li>').join('') + '</ul></div>' +
+    '<div><h4>2. Ажигла' + (allSet ? '' : ' (эхлээд тохиргоог хий)') + '</h4><ul class="chk-list">' + ph.watch.map((w, i) => '<li class="' + (LAB.done[i] ? 'ok' : '') + '">' + esc(w.t) + '</li>').join('') + '</ul><p class="hint" style="margin-top:8px">' + esc(ph.hint) + '</p>' +
+    '<div class="steprow"><button class="btn ghost small" data-a="restart">Шинээр эхлүүлэх</button><span style="flex:1"></span><button class="btn go" data-a="next"' + (allDone ? '' : ' disabled') + '>' + (last ? 'Асуулт руу →' : 'Дараагийн туршилт →') + '</button></div></div></div>';
+}
+function buildLabQuiz(lab) {
+  $('#labQuiz').innerHTML = ''; $('#labQScore').textContent = ''; $('#labDoneRow').hidden = true;
+  let ans = 0, right = 0;
+  lab.q.forEach((q, qi) => {
+    const d = document.createElement('div'); d.className = 'panel qq';
+    d.innerHTML = '<h4>' + (qi + 1) + '. ' + esc(q.q) + '</h4>' + q.o.map((o, i) => '<button class="qo" data-i="' + i + '">' + esc(o) + '</button>').join('') + '<div class="qe" hidden></div>';
+    let done = false;
+    $$('.qo', d).forEach(b => b.addEventListener('click', () => {
+      if (done) return; done = true; ans++;
+      const i = +b.dataset.i;
+      if (i === q.a) { right++; b.classList.add('right'); } else { b.classList.add('wrong'); $$('.qo', d)[q.a].classList.add('right'); }
+      const e = $('.qe', d); e.hidden = false; e.textContent = q.e;
+      $('#labQScore').textContent = 'Оноо: ' + right + ' / ' + lab.q.length;
+      if (ans === lab.q.length) {
+        PROG.labs[lab.id] = true; saveProg(); $('#labDoneRow').hidden = false;
+        $('#btnLabNext').textContent = LABS.find(l => l.id === lab.id + 1) ? 'Дараагийн лаборатори →' : 'Лабораториуд руу →';
+        toast('Лаборатори ' + lab.id + ' дууслаа.');
+      }
+    }));
+    $('#labQuiz').appendChild(d);
+  });
+}
+
+/* ---------- Эхлүүлэх ---------- */
+function initApp() {
+  loadProg();
+  try { const o = JSON.parse(localStorage.getItem('invlab-bench-main') || 'null'); if (o && o.comps) BSTATE.main = { comps:o.comps, wires:o.wires, nid:o.nid, hist:[] }; } catch (e) {}
+  TABS.forEach(t => t.items.forEach(it => { if (it.k && ctlEls[it.k]) ctlEls[it.k].tab = t.title; }));
+  benchHook = onBench;
+  $('#labPhaseCard').addEventListener('click', e => {
+    const a = e.target.closest('[data-a]'); if (!a) return;
+    const lab = labOf();
+    if (a.dataset.a === 'restart') { restart(lab.start); S.latch = null; LAB.sig = ''; setPlaying(true); }
+    if (a.dataset.a === 'next') {
+      if (LAB.phase < lab.phases.length - 1) {
+        LAB.phase++; LAB.reached = Math.max(LAB.reached, stepIndex());
+        if (lab.phases[LAB.phase].rewire) { setPlaying(false); LAB.rewire = true; showStep('wire'); return; }
+        startPhase(true); LAB.sig = ''; renderStepper();
+      }
+      else { setPlaying(false); showStep('q'); }
+    }
+  });
+  $('#btnLabToRun').addEventListener('click', () => {
+    if (!BENCH.reqOK) return;
+    const lab = labOf();
+    if (LAB.rewire) {
+      const d = benchDerive(BENCH.ev); patchCfg({ series:d.series, strings:d.strings }); LAB.rewire = false;
+      LAB.reached = Math.max(LAB.reached, 1 + LAB.phase); showStep('run'); startPhase(true); renderStepper(); return;
+    }
+    labConfig(lab); LAB.phase = 0; LAB.reached = Math.max(LAB.reached, 1);
+    showStep('run'); startPhase(true); renderStepper();
+  });
+  $('#btnLabNext').addEventListener('click', () => { const nx = LABS.find(l => l.id === LAB.id + 1); if (nx) go('lab', nx.id); else go('labs'); });
+  $('#btnWireNext').addEventListener('click', applyBench);
+  $('#openAll').addEventListener('change', e => { PROG.open = e.target.checked; saveProg(); renderLabList(); renderNav(); });
+  window.addEventListener('hashchange', route);
+  route();
+}
+init();
+initApp();
+
+</script>
+</body>
+</html>
